@@ -2,9 +2,9 @@
   ansible.builtin.file:
     path: /home/{{ ssh_user }}
     state: directory
-    mode: '0755'
+    mode: '0700'
     owner: "{{ ssh_user }}"
-    group: "{{ ssh_user }}"
+    group: "{{ ssh_group }}"
 
 - name: Ensure the .ssh directory exists for user {{ ssh_user }}
   ansible.builtin.file:
@@ -12,7 +12,7 @@
     state: directory
     mode: '0700'
     owner: "{{ ssh_user }}"
-    group: "{{ ssh_user }}"
+    group: "{{ ssh_group }}"
 
 - name: Copy the public key to the authorized_keys file for user {{ ssh_user }}
   ansible.builtin.authorized_key:

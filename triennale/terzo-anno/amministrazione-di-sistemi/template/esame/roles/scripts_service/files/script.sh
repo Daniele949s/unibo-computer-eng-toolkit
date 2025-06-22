@@ -40,12 +40,13 @@ fi
 
 # UTILS ---------------------------------------------------
 # identità utente (in questo caso l'ip)
-IP=$(hostname -I | awk '{print $1}')
+IP=$(hostname -I | awk '{print $2}')
 
 # per gli altri check: man test
 [ -f "$FILE" ] && echo "File $FILE exists." || echo "File $FILE does not exist."
 [ -d "$DIR" ] && echo "Directory $DIR exists." || echo "Directory $DIR does not exist."
 [ -x "$FILE" ] && echo "File $FILE is executable." || echo "File $FILE is not executable."
+# -s per vedere se un file è vuoto
 
 # manipolazione file temporaneo
 TEMP_FILE=$(mktemp)
@@ -64,6 +65,22 @@ sudo chown $NEW_USER:$NEW_GROUP nome_file   # cambia proprietario file
 sudo chown :$GROUPNAME /cartella_gruppo     # directory accessibile solo a un gruppo
 sudo usermod -g $NEW_GROUP $USERNAME        # cambia gruppo di un utente
 
+# cambia i permessi della home
+chown -R $USERNAME:$USERNAME /home/$USERNAME
+chmod -R 700 /home/$USERNAME
+
+# cambia permessi delle chiavi
+chown $USERNAME:$USERNAME /home/$USERNAME/.ssh/id_rsa*
+chmod 400 /home/$USERNAME/.ssh/id_rsa
+chmod 444 /home/$USERNAME/.ssh/id_rsa.pub
+
+# prima di inserire la chiave pubblica, ricorda sempre di fare
+# grep "$PUBKEY" /home/$USERNAME/.ssh/authorized_keys || la aggiungo...
+chown $USERNAME:$USERNAME /home/$USERNAME/.ssh/authorized_keys
+chmod 644 /home/$USERNAME/.ssh/authorized_keys
+
+
+
 # ~/.ssh/authorized_keys         -> 600 (solo lettura/scrittura per l'utente)
 # ~/.ssh/                        -> 700 (accesso completo solo all'utente)
 # ~/.ssh/id_rsa (chiave privata) -> 600
@@ -71,7 +88,6 @@ sudo usermod -g $NEW_GROUP $USERNAME        # cambia gruppo di un utente
 # /home/user/, meglio chmod -R   -> 700
 
 # LDAP -----------------------------------------------------
-
 
 # Search entire LDAP directory
 ldapsearch -x -D "cn=admin,dc=labammsis" -w "gennaio.marzo" -H ldap://$IP/ -b "dc=labammsis" -s sub
@@ -151,9 +167,9 @@ snmpget -v 1 -c public $IP NET-SNMP-EXTEND-MIB::nsExtendOutputFull.\"test\" | aw
 # aggiunta comandi snmpd (operazione con sudo)
 echo "extend-sh ${USERNAME}_PUB /usr/bin/sudo -u vagrant /usr/bin/cat ${PATH_KEYS}/${USERNAME}.pub" | sudo /usr/bin/tee -a /etc/snmp/snmpd.conf > /dev/null
 echo "extend-sh ${USERNAME}_PRIV /usr/bin/sudo -u vagrant /usr/bin/cat ${PATH_KEYS}/$USERNAME" | sudo /usr/bin/tee -a /etc/snmp/snmpd.conf > /dev/null
-
-# restart snmpd once for all    
+# !!! IMPORTANTE !!! Da fare alla fine
 sudo /usr/bin/systemctl restart snmpd.service
+
 
 # SSH ------------------------------------------------------
 
@@ -192,7 +208,11 @@ ssh root@$IP " tar -cz -C /home/$USER . " > /archive/path.tgz
 echo "$STRING" | grep -E '^10\.1\.1\.[0-9]+$|^10\.2\.2\.[0-9]+$' && echo "Valid IP"
 
 echo "$STRING" | grep -F "$SUBSTRING" && echo "Substring found"
+
 # CICLI-----------------------------------------------------
+
+# !!! NOTA BENE !!!
+# tail non usarlo sempre, ha di default -n 10
 
 # con -F, evita l'errore se non esiste
 tail -F "$LOGFILE" | while read -r LINE; do
@@ -201,17 +221,23 @@ tail -F "$LOGFILE" | while read -r LINE; do
 
 done
 
+# lettura solo dell'ultima riga
 tail -n 1 -F "$LOGFILE" | while read -r LINE; do
     echo "$LINE"
 done
 
 # riga nel formato _a_B_c_
-tail -f $LOGFILE | while IFS='_' read -r _ TYPE USER IP _ ; do 
+tail -F $LOGFILE | while IFS='_' read -r _ TYPE USER IP _ ; do 
 
 done
 
+# Questo stampa solo il messaggio del log
+while read MON DAY TIME HOST USER MESSAGE ; do
+    echo "$MESSAGE"
+done < $LOGFILE
+
 # lettura con separatore "custom"
-cat $FILE | grep -Ev '^#' | while IFS=\; read USERNAME USERID PASSWORD ; do
+grep -Ev '^#' $FILE | while IFS=\; read USERNAME USERID PASSWORD ; do
 
 	# logging
 	for LAST in {100..120} ; do

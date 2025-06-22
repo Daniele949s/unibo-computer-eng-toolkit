@@ -8,10 +8,6 @@
 
 - Se dà problemi di path traversal, inizia il path con /./.. etc
 
-Esempio command injection: http://localhost:8000/?domain=www.ulisse.unibo.it|%20more%20../../../../../../etc/passwd%20
-
-- Se dà problemi perchè "file non può finire con x", prova mettendo *, oppure %20 per aggiungere uno spazio alla fine
-
 
 # SQL Injection
 
@@ -71,6 +67,10 @@ SELECT id, username, email FROM users WHERE id = 1;
 
 # Web Command injection
 La Web Command Injection è una vulnerabilità di sicurezza in cui un'applicazione web accetta input dall'utente e lo utilizza all'interno di un comando di sistema senza un'adeguata sanitizzazione o convalida. Ciò consente ad un attaccante di eseguire comandi arbitrari sul server.
+
+Esempio command injection: http://localhost:8000/?domain=www.ulisse.unibo.it|%20more%20../../../../../../etc/passwd%20
+
+- Se dà problemi perchè "file non può finire con x", prova mettendo *, oppure %20 per aggiungere uno spazio alla fine
 
 ## Concatenazione di comandi
 

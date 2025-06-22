@@ -30,6 +30,10 @@ l'ultima riga ```@@x_include /etc/aide/aide.conf.d ^[a-zA-Z0-9_-]+$``` istruisce
 ```sh
 sudo aideinit
 
+# controllo l'integrità del filesystem
+aide -C -c /etc/aide/aide.conf
+
+
 # per una "fotografia" più recente del fs:
 sudo cp /var/lib/aide/aide.db.new /var/lib/aide/aide.db
 ```
@@ -40,7 +44,7 @@ sudo cp /var/lib/aide/aide.db.new /var/lib/aide/aide.db
 # creo un file indesiderato in /bin
 touch /bin/indesiderato
 
-# controllo l'integrità del filesystem
+# ricontrollo l'integrità del filesystem
 aide -C -c /etc/aide/aide.conf
 
 ```
@@ -161,7 +165,7 @@ group::r--
 mask::r--
 other::r--
 
-L'utente spy può modificare il file.
+L'utente spy può modificare il file
 
 L'utente stesso è definito nel file:
 
@@ -241,7 +245,7 @@ cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash
 # L’utente user può poi semplicemente lanciare /tmp/rootbash e ottenere una shell root
 ```
 
-# Esami su Privilege escalation
+# Trick su Privilege escalation
 
 1) inizializzare aide: aideinit
 

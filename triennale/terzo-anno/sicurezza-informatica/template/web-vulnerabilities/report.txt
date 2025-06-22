@@ -1,7 +1,118 @@
 # Nome: Davide Chirichella
 # Matricola: 0001071414
-# Esercizio: web vulnerabilities GG MM AAAA
+# Esercizio: web vulnerabilities
 
 # ==============================================================================
+
+1. Accedendo al sito, noto queste caratteristiche:
+
+    - È presente un link ad una "XSS CHALLENGE"
+
+    - Navigando sul link, si osserva come sulla pagina venga mostrato il testo "Hello SEC_EXAM". 
+    Guardando l'URL, si nota come ci sia un parametro name che abbia come valore SEC_EXAM.
+
+2. Da ciò si evince che è possibile sfruttare una vulnerabilità nota: path traversal, la quale consente di
+navigare liberamente tra file e directory nella macchina in cui è hostata l'applicazione. Sfruttando quindi
+sequenze come ../ possiamo navigare per la struttura delle cartelle e leggere qualsiasi file di sistema
+
+	- Provo a navigare per raggiungere il file con "../", ma è filtrato
+	Per risolvere provo ad inziare con ./  
+
+	- Provo ad usare cat per stampare il file su standard output, ma è filtrato. 
+	Comandi simili possono essere:
+	less, more, head, tail, sed '', tac.
+	
+	- Provo ad usare ";" per eseguire un altro comando ma è filtrato.
+	Per risolvere per uso una pipe |
+	
+	- Provo a inserire il payload, ma è filtrato.
+	Per mettere uno spazio in ASCII in URL encoding utilizzo %20
+
+2. Da ciò si evince che è possibile sfruttare una vulnerabilità nota: sql injection, la quale 
+consentirà di inserire codice SQL malevolo (non sanitizzato) in un campo di input per manipolare 
+a nostro piacimento le query al database ed ottenere dati sensibli.
+
+	- L'idea è sfruttare l'input dell'utente per modificare la query SQL in modo che la condizione risulti sempre vera:
+	
+	1. Esempio di Query Vulnerabile: `SELECT * FROM users WHERE username = 'user' AND password = 'password'`;
+	Se l'input dell'utente per il campo username è: `' OR 1=1 --`, oppure `' OR '1' = '1`
+
+	2.La query diventa: `SELECT * FROM users WHERE username = '' OR 1=1 --' AND password = 'password'`;
+	OR 1=1: forza la condizione ad essere sempre vera.
+	--: commenta il resto della query, ignorando la verifica della password
+	
+	
+	- L'idea è di sfruttare l'operatore UNION per combinare il risultato di una query legittima con dati 
+	estratti da altre tabelle del database (a tale scopo sono particolarmente rilevanti le tabelle
+	che contengono informazioni sulla struttura del database, cone information_schema in mysql)
+
+	1. La prima fase è scoprire il numero di colonne iniettando diverse query con NULL.
+	Se dà errore, significa che il numero di colonne specificato non corrisponde a quello 
+	atteso dalla query originale. Provo ad iniettare un solo NULL, vedendo l'output cosa restituisce:
+	
+		-`' UNION SELECT NULL #` oppure `' UNION SELECT NULL --`, dipende dalla versione di sql 
+	
+	Dà errore, bisogna provare con più colonne.
+	
+	2. Dopo diversi tentativi scopro che con la seguente query non viene restituito errore:
+	
+		-`' UNION SELECT NULL, NULL, NULL #`
+	
+	Da ciò si deduce che il numero di colonne è esattamente 3
+	
+	3. Inietto le seguenti query per poter rispettivamente:
+
+		- Scoprire gli Schemi: `' UNION SELECT NULL, NULL, schema_name FROM information_schema.schemata #`
+		- Scoprire le Tabelle: `' UNION SELECT NULL, NULL, table_name FROM information_schema.tables #`
+		- Scoprire le Tabelle di uno Specifico Schema:`' UNION SELECT NULL, NULL, table_name FROM information_schema.tables WHERE table_schema = 'unibo' #`
+		- Scoprire le Colonne di una Specifica Tabella:`' UNION SELECT NULL, NULL, column_name FROM information_schema.columns WHERE table_name = 'users' #`
+	
+	4. Ne consegue che è possibile recuperare i dati della tabella "users" in questo modo:
+
+		- `' UNION SELECT NULL, NULL, username FROM users #`
+
+2. Da ciò si evince che è possibile sfruttare una vulnerabilità nota: command injection, in quanto l'applicazione web 
+accetta input dall'utente e lo utilizza all'interno di un comando di sistema senza convalidandolo adeguatamente. 
+Ciò consentirà di iniettare comandi arbitrari sul server.
+
+	1. Il primo passo è quello di riuscire a concatenare comandi. Provo ad usare il ";" che in linux separa due comandi ma è filtrato.
+
+	- Per risolvere uso l'operatore AND (&&) che esegue un comando solo se quello prima dell'operatore ha successo
+	- Per risolvere uso l'operatore OR (||) che esegue un comando solo se quello prima dell'operatore fallisce
+	- Per risolvere uso la pipe (|) che dà come standard input di un comando lo standard output di quello prima della pipe
+	- Per risolvere uso le parentesi tonde "()", che in linux eseguono i comandi in una subshell.
+	- Per risolvere uso il comando "&" che esegue il comando in background
+
+	- Provo ad usare cat per stampare il file su standard output, ma è filtrato. 
+	Comandi simili possono essere:
+	less, more, head, tail, sed '', tac.
+	
+	- Provo a inserire il payload, ma è filtrato.
+	Per mettere uno spazio in ASCII in URL encoding utilizzo %20
+
+2. Da ciò si evince che è possibile sfruttare una vulnerabilità nota: XSS, la quale consente di iniettare codice JavaScript
+malevolo in una pagina web che, se non viene correttamente filtrato, verrà eseguito. I tipi principali di XSS sono:
+
+	- Stored XSS: il codice è salvato nel database e viene mostrato a ogni utente che visualizzerà quella entry
+	- Reflected XSS: il codice è passato direttamente nell'URL e viene riflesso nella risposta
+	- DOM-based XSS: il codice è eseguito nel browser, manipolando direttamente il DOM
+
+Esso, anche se è effettivamente codice eseguito unicamente lato client, rappresenta una minaccia in quanto può consentire 
+ad un attaccante di rubare cookie di sessione, eseguire azioni al posto dell’utente, effettuare redirect verso siti malevoli,
+e inserire dei form falsi (phishing). Provo a sfruttarla nel seguente modo:
+
+	1. Provo a cambiare il parametro name, ci si accorge che questo viene cambiato anche nella pagina.
+	Si potrebbe quindi avere una XSS Reflected. Si prova un payload classico: <script>alert("ciao")</script>
+
+	2. Il sito restituisce "error". Forse è presente qualche meccanismo contro gli XSS o il payload è stato filtrato.
+
+	3. Provando a utilizzare un semplice <p> funziona, quindi provo ad utilizzare altri tag.
+
+	4. Il tag <img> non è filtrato. Quindi si procede ad utilizzare una classica XSS con img, ovvero :
+	<img src="x" onerror="alert(1)">
+
+
+
+3. Si comprende dunque che il payload malevolo è:
 
 # ==============================================================================

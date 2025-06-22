@@ -4,15 +4,15 @@
     path: /home/{{ ssh_user }}
     state: directory
     owner: "{{ ssh_user }}"
-    group: "{{ ssh_user }}"
-    mode: '0755'
+    group: "{{ ssh_group }}"
+    mode: '0700'
 
 - name: Ensure .ssh directory exists for user {{ ssh_user }}
   ansible.builtin.file:
     path: /home/{{ ssh_user }}/.ssh
     state: directory
     owner: "{{ ssh_user }}"
-    group: "{{ ssh_user }}"
+    group: "{{ ssh_group }}"
     mode: '0700'
 
 - name: Copy private key for user {{ ssh_user }}
@@ -21,7 +21,7 @@
     dest: /home/{{ ssh_user }}/.ssh/id_rsa
     mode: '0600'
     owner: "{{ ssh_user }}"
-    group: "{{ ssh_user }}"
+    group: "{{ ssh_group }}"
 
 - name: Copy public key for user {{ ssh_user }}
   ansible.builtin.copy:
@@ -29,5 +29,5 @@
     dest: /home/{{ ssh_user }}/.ssh/id_rsa.pub
     mode: '0644'
     owner: "{{ ssh_user }}"
-    group: "{{ ssh_user }}"
+    group: "{{ ssh_group }}"
 
