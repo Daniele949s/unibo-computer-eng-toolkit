@@ -19,8 +19,9 @@ La struttura della libreria è la seguente:
 
     - Makefile
 	mediante il comando "make consegna < es1 ... esn>" è possibile
-	creare l'archivio .zip da consegnare. Eventuali cartelle "utils"
-	all'interno degli esercizi verranno ignorate
+	creare l'archivio .zip da consegnare specificando i 3 esercizi
+	svolti. Eventuali cartelle "utils" all'interno delle cartelle degi
+	esercizi verranno ignorate
 	
 	! IMPORTANTE ! Cambiare la matricola
 
