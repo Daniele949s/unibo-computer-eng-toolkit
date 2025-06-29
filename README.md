@@ -1,9 +1,18 @@
-# unibo-computer-eng-toolkit
+# Unibo - Computer engineering toolit
 
-I'm Davide Chirichella, a [Computer Engineering](corsi.unibo.it/laurea/IngegneriaInformatica) student at the University of Bologna (unibo), enrolled since 2022.
+Sono Davide Chirichella, studente di [Ingegneria Informatica](corsi.unibo.it/laurea/IngegneriaInformatica) all'Università di Bologna (unibo), immatricolato nel 2022.
 
-This repo collects some of the libraries and utilities I’ve built for my courses. 
+Qui sono raccolte le librerie che ho utilizzato per tutti gli esami di programmazione del mio percorso, anche in collaborazione con [Filippo Giulietti](https://github.com/FiloGiulietts)
 
-**Warning**: It’s not a complete collection (yet!)—just the ones I’ve bothered to upload. If you’re looking for something specific, feel free to ask!
+#  Struttura
 
-**Disclaimer**: No guarantees—this code might save your homework or crash your IDE. Proceed at your own risk!
+Per ogni corso c'è una cartella chiamata `template` o `lib` che contiene 
+
+1. Un `README.md` con la descrizione della struttura del template o della libreria specifica 
+2. Eventuali `Utilities` sia per gli esercizi, sia per configurare l'ambiente in laboratorio
+
+**Warning**: questa non è una raccolta completa e alcune informazioni potrebbero variare.
+La struttura dei corsi, i docenti o le modalità d’esame potrebbero essere cambiati nel tempo.
+
+**Disclaimer**: Questo materiale è stato raccolto solo a scopo informativo / di supporto e non viene mantenuto attivamente.
+In particolare, in caso di aggiornamenti agli IDE o agli strumenti utilizzati, verifica sempre ciò che esegui.
