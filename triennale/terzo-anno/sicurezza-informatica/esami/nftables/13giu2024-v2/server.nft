@@ -1,0 +1,36 @@
+# Nome: Davide Chirichella
+# Matricola: 0001071414
+# Esercizio: nftables - server
+
+# Server ===============================================================================================
+
+table ip filter {
+
+	chain INPUT {
+		type filter hook input priority 0; policy drop;
+		
+		
+		# accesso da parte dei client alla porta TCP 993 del server
+		iif eth1 ip saddr 1.1.1.1 tcp dport 993 accept
+
+		# accesso da parte di qualsiasi host su internet alla porta TCP 25 del server
+		iif eth1 tcp dport 25 accept
+		
+
+		iif lo accept
+	}
+
+	chain OUTPUT {
+		type filter hook output priority 0; policy drop;
+
+
+		# accesso da parte dei client alla porta TCP 993 del server
+		oif eth1 ip daddr 1.1.1.1 tcp sport 993 ct state established accept
+
+		# accesso da parte di qualsiasi host su internet alla porta TCP 25 del server
+		oif eth1 tcp sport 25 ct state established accept
+
+
+		oif lo accept
+	}
+}

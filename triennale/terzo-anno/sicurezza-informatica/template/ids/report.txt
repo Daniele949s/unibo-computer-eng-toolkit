@@ -1,0 +1,106 @@
+# Nome: Davide Chirichella
+# Matricola: 0001071414
+# Esercizio: network intrusion
+
+# ==============================================================================
+
+1. Apro il file .pcapng fornito con Wireshark e procedo ordinando opportunamente in base
+all'ip sorgente, o filtrandoli in automatico inserendo il nome del protocollo nei "filters",
+posso notare che:
+
+    - È stata rilevata una grande quantita di pacchetti tutti provenienti dalla stessa sorgente (10.10.10.10) 
+    ma a porte diversi. È molto probabilmente indicativo di port scan
+    
+    alert tcp any any -> any any (msg:"Possible Port Scan Detected"; flags:S; detection_filter:track by_src, count 20, seconds 5; sid:1100001; rev:1;)
+    
+    - È stata rilevata una grande quantità di richieste SYN-TCP verso la stessa destinazione senza il 
+    corrispettivo ACK. Probabilmente è un caso di SYN flood, un attacco di tipo denial of service
+    
+    alert tcp any any -> any any (msg:"Possible SYN Flood Attack"; flags:S; detection_filter:track by_src, count 100, seconds 1; sid:1100002; rev:1;)
+
+    - È stata rilevata una grande quantita di pacchetti tutti proveniente da sorgenti variabili ma alla 
+    stessa porta. È molto probabilmente indicativo di DDoS
+    
+    alert ip any any -> any 80 (msg:"Possible DDoS - Many Sources to Same Port"; detection_filter:track by_dst, count 100, seconds 1; sid:1100003; rev:1;)
+    
+    
+    - "È stata identificata una richiesta HTTP con intestazione User-Agent contenente una funzione Bash 
+    malformata, tipica del pattern "Shellshock". Per identificarla, posso filtrarla con
+    
+    http.user_agent contains "() { :; };"
+    
+    alert http any any -> any any (msg:"Shellshock Exploit Attempt"; content:"() { :; }"; http_header; content:"User-Agent"; sid:1100004; rev:1;)
+    
+    - È stata rilevata una risposta multipla (più DHCP offer) da MAC diversi a una singola richiesta. È 
+    probabile che l’attaccante abbiaa inviato offerte DHCP false per assegnare gateway DNS maligni 
+    o deviare il traffico verso di sé: DHCP spoofing
+    
+    alert udp any 67 -> any 68 (msg:"Possible DHCP Spoofing - Multiple Offers"; content:"|02 01|"; offset:0; depth:2; detection_filter:track by_dst, count 3, seconds 10; sid:1100005; rev:1;)
+    
+    - È stata identificata una risposta DNS per il dominio www.google.com che restituisce un indirizzo IP 
+    privato (es. 192.168.x.x), suggerendo un possibile caso di DNS Spoofing.
+    
+    alert dns any 53 -> any any (msg:"DNS Spoofing - Private IP in Response"; dns.response; content:"192.168."; sid:1100006; rev:1;)
+    
+    - È stata identificata una grande quantità di richieste di accessi SSH verso un server.
+    È probabilmente indicativo di bruteforce.
+    
+    alert tcp any any -> any 22 (msg:"SSH Brute‐Force Attempt"; flow:to_server; detection_filter:track by_src, count 5, seconds 60; sid:1000004; rev:1;)
+    # versione http
+    alert http any any -> any any (msg:"HTTP Login Brute‐Force"; http.method; content:"POST"; http.uri; content:"/login"; detection_filter:track by_src, count 10, seconds 60; sid:1000005; rev:1;)
+    
+    - FIltrando con "arp", vedo tanti pacchetti ARP Reply non richiesti (senza un Who has), più MAC address 
+    associati allo stesso IP (IP del router ad es.), lo stesso IP che cambia MAC nel tempo (instabilità).
+    È probabilmente che sia un tentativo di ARP poisoning, che consiste nell'inoltrare il traffico destinato 
+    a un host verso l’attaccante, fingendosi quell’host tramite pacchetti ARP falsificati.
+    
+    alert arp any any -> any any (msg:"ARP Poisoning Detected - Unsolicited Replies"; arp_opcode:2; detection_filter:track by_src, count 10, seconds 10; sid:1100007; rev:1;)
+
+    - È possibile notare altre peculiarità (risposte da server (es: Unauthorized ), tipologie di richieste (http GET)...)
+    
+    alert http any any -> any any (msg:"Suspicious HTTP - Unauthorized Access"; content:"HTTP/1.1 401 Unauthorized"; http_stat_code; sid:1100008; rev:1;)
+
+
+2. Utilizzo Suricata per generare degli alert in base a certe condizioni di traffico. 
+
+    - Per analizzare il payload è opportuno impostare nel file /etc/suricata/suricata.yaml il valore 
+    "payload printable" a "true"
+
+    - Per monitorare solo la rete 192.168.X.X devo cambiare sul suricata.yaml HOME_NET: "[192.168.0.0/16]
+
+3. Scrivo una regola suricata opportuna (vedere exam.rules)
+	Opzioni "esterne"
+	- alert	Azione: alert, drop, reject, pass, log
+	- protocol	tcp, udp, icmp, ip, http, tls
+	- any		IP o porta: puoi usare IP specifici (es. 192.168.1.10) o subnet (10.0.0.0/8)
+
+	Opzioni "interne"
+	- msg		Descrizione dell’alert, visibile in fast.log
+	- flow		Direzione e stato della connessione
+	- content	Cerca stringa nel payload
+	- pcre		Cerca tramite espressione regolare PCRE
+	- http_*	Modificatori come http_uri, http_host, http_header, http_method, ecc.
+	- tls_sni	Verifica il campo SNI nel traffico TLS
+	- sid		Identificativo univoco (non deve ripetersi!)
+	- rev		Numero versione: incrementalo se modifichi la regola
+	- classtype	Categoria dell’attacco (rende più leggibile il log)
+	- priority	Importanza dell’alert: 1 (alta), 2 (media), 3 (bassa)
+	- metadata	Info libere come autore, data, riferimento
+
+4. Per applicare la mia regola al file pcapng uso il comando
+	
+	mkdir logs
+	sudo suricata -c /etc/suricata/suricata.yaml -l logs -s esame.rules -r file.pcapng -k none
+
+I log di output verranno inseriti nella directory ./logs
+
+4. Analizzando il file "eve.json", posso notare che il tentativo di attacco è stato rilevato con successo
+identificando la flag:
+
+    cat $LOGFILE | jq 'select(.payload_printable|contains("flag"))'.payload_printable 2>/dev/null
+
+    tail -f $LOGFILE | jq 'select(.event_type="alert")'
+
+RISULTATO: "flag{ this_is the_flag}"
+
+# ==============================================================================

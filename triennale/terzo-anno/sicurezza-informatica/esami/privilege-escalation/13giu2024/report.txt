@@ -1,0 +1,114 @@
+# Nome: Davide Chirichella
+# Matricola: 0001071414
+# Esercizio: privilege escalation 13 giu 2024
+
+# DETECTION ==============================================================================
+
+Lo strumento che utilizzerò è "aide" (Advanced Intrusion Detection Environment), uno strumento 
+che monitora l'integrità dei file di sistema, confrontandone lo stato attuale con una "fotografia" iniziale per 
+rilevare modifiche non autorizzate.
+
+1. Imposto su /etc/aide/aide.conf la direttiva per indicare tutte le cartelle potenzialmente modificabili.
+In questo caso, come da traccia:
+
+/usr/bin  f  Full
+/etc/    f Full
+
+2. Avvio aide per fare una "fotografia" dello stato attuale del mio sistema mediante il comando:
+
+sudo aideinit
+
+Potrebbe essere necessario copiare a mano il database con
+
+mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
+
+3. Lancio una scansione con "aide -C -c /etc/aide/aide.conf"
+
+4. Eseguo il programma vulnerabile
+
+5. Eseguo nuovamente una scansione con "aide -C -c /etc/aide/aide.conf"
+
+3. Noto, anche mediante i comandi "getcap" e "getfacl", che il binario fornito ha effettuato le seguenti operazioni:
+
+File: /etc/crontab
+ Perm      : -rw-r--r--                       | -rw-rw----
+ Ctime     : 2024-11-30 09:21:11 -0500        | 2025-06-21 06:35:53 -0400
+ ACL       : A: user::rw-                     | A: user::rw-
+             A: group::r--                    | A: group::rw-
+             A: other::r--                    | A: other::---
+
+Tolti i permessi di lettura ad "other" e tolti permessi di scrittura a "group"
+
+
+File: /etc/passwd
+ Size      : 3512                             | 3546
+ Mtime     : 2025-05-07 13:21:50 -0400        | 2025-06-21 06:35:53 -0400
+ Ctime     : 2025-05-07 13:21:50 -0400        | 2025-06-21 06:35:53 -0400
+ SHA256    : vZ/dRgF8Y1W6N8m1g0kqRrfiGtmNM5Vq | VrTtLjtsTJ7e/bANRSeb+T3EH6M/dH2d
+             hn5+eI8Ppn0=                     | 5xjApLam9S4=
+ SHA512    : s62bwYsh69q8p+3WiDhYwXLTKTk17lKZ | cwCsi/cPEJCXSTuV222QX0s7sk6O1/p/
+             kkyt/B/B6aEkL6lb0viM2ODRXkQPuE32 | RiI9pNarG53RtjAa04m/d55qr8jj40zP
+             RpNNe3RuwMcAuKZPQ6eTYA==         | JZQYad3JOWz5xJfchAE+lQ==
+ STRIBOG256: x4gmy0p48hS7qkUsrYjYO7bf2WsT7kOg | zq6tUds7L6BddiMFggvnlo4GfKd9sJ4G
+             v3SzIaVT99k=                     | 6aEOn7aEvKQ=
+ STRIBOG512: zjPZdmhCVjRyL1X3rlGANDGyW5VF55aL | n0owp2/jykvDkOSY8258pXyJSU8p5ar9
+             bjFaMj+emYW5WTpnsxSZ6YcR8Vt72f74 | DNVr3wc+bJ7u2v/ZnM9BYkz1MHrx7EVM
+             2XGANSPRvhEbWcgHkT+Rrg==         | xkVaQKk9uHxJu7fvqqLAHg==
+ SHA512/256: vlfX9+gjdmIIuXJVjusEFcYTsydDQ4s4 | 5/zZk2+lvUSyCaV5JILmJDS/iaYnWG+M
+             hNK1cv0jvSk=                     | afi6uGmky4A=
+ SHA3-256  : FXNFhD5Pd/X9FafLdGg+KBdEPf+eaLvd | hrHmZLdZWs3zz1czoiEhE213Db5WDDt7
+             fNvoJd9Ma6E=                     | qZxKSL+AQR0=
+ SHA3-512  : QF/Rih3YTSk7tyRzXddiSfuFRnhkd6QC | lZiJC7GuKd9V9hyG3Cbx0UiBc+Eq2X/g
+             J7MqFWwVgnlc2rFcdudUbkqxj6OowNST | AUhvZE2QJzoUgzjk9EWy6AkKgRIipKjt
+             fgLxYltL8icM5lC9dfh+GQ==         | ZU/2QkLniLY4XJLgIEnceg==
+             
+Aggiunto l'utente: intruso::1202:1000::/tmp:/bin/bash, ha il login senza password, 
+come shell di default /bin/bash e come homedir /tmp
+
+File: /etc/sudoers
+ Perm      : -r--r-----                       | -r--rw----
+ Ctime     : 2025-05-07 11:43:38 -0400        | 2025-06-21 06:35:53 -0400
+ ACL       : A: user::r--                     | A: user::r--
+             A: group::r--                    | A: user:intruso:rw-
+             A: other::---                    | A: group::r--
+                                              | A: mask::rw-
+                                              | A: other::---
+                                              
+Aggiunti i permessi di scrittura / lettura all'user "intruso"
+Maschera in scrittura & lettura
+
+File: /usr/bin/tee
+ Ctime     : 2024-11-30 09:21:20 -0500        | 2025-06-21 06:35:53 -0400
+ XAttrs    : num=0                            | num=1
+                                              | [1] security.capability <=> AAAA
+                                              | AgAAAAAAAAAAAAAAAAAAAAA=
+                                              
+Nessuna modifica rilevante
+
+File: /usr/bin/vim.basic
+ Ctime     : 2024-11-30 09:21:22 -0500        | 2025-06-21 06:35:53 -0400
+
+Nessuna modifica rilevante
+
+# ATTACK =================================================================================
+
+- L'ACL configurata per l'utente "intruso" gli dà i permessi di scrittura con sudoers,
+il file che specifica quali operazioni un utente può fare con i privilegi di un altro utente
+Per diventare root basterà quindi diventare l'utente intruso (su intruso, non
+chiederà nessuna password come previsto), editare il file /etc/sudoers ed inserire questa riga
+
+nano /etc/sudoers
+
+intruso ALL=(ALL:ALL) ALL
+
+In questo modo gli sto dicendo che con sudo, intruso potrà eseguire TUTTO con i privilegi di 
+TUTTI gli utenti
+
+- A questo punto eseguendo il comando `sudo -i` possiamo diventare root e lanciare il comando id
+
+┌──(root㉿kali)-[~]
+└─# id
+uid=0(root) gid=0(root) groups=0(root)
+
+
+
