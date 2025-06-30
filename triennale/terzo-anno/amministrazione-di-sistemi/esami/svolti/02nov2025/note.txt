@@ -1,2 +1,0 @@
-La chiave va generata manualmente e la password va aggiunta manualmente
-* consultare i moduli *

@@ -1,0 +1,1 @@
+alert tcp 10.10.0.0/16 any -> 10.10.10.10 23 (msg:"Flag Detected"; sid:10000555; pcre:"/FLAG\{[a-zA-Z0-9_]+\}/"; priority:2; rev:1;)

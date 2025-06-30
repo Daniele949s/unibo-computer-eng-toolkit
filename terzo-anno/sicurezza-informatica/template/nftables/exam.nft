@@ -1,0 +1,200 @@
+# Nome: Davide Chirichella
+# Matricola: 0001071414
+# Esercizio: nftables
+
+# TIPS =================================================================================================
+
+- Se una rete è privata e deve accedere una pubblica devo opportunamente fare il dnat / snat
+
+- template per regole "complete":
+    iif ethN oif ethN ip saddr IPS ip daddr IPD udp sport P tcp dport P ct state established accept
+
+- Se devo fare istradamento tra una rete privata e una pubblica
+es. [ client: 10.1.1.0/24 <---> 10.1.1.254 :router: 72.0.0.254 <--> 72.0.0.1 :server ]
+devo mettere come ip sorgente "accettato" dal server pubblico 72.0.0.254
+
+- Il router non ha regole in input e in output a meno che non ci siano dei servizi in esecuzione 
+su di esso
+
+- Per controllare la sintassi di regole nft: nft -c -f nomefile.nft
+
+# Client ===============================================================================================
+
+table ip filter {
+
+	chain INPUT {
+        type filter hook input priority 0; policy drop;
+        
+
+		# CASO: accesso dai client (rete privata 192.168.0.0/24) verso le porte UDP 53 e 123 di internet
+		iif eth1 udp sport 53  ct state established accept
+		iif eth1 udp sport 123 ct state established accept
+
+		
+		# CASO: accesso da parte dei client alla porta TCP 993 del server
+		# Permette richieste alla porta 993 del server 
+		iif eth1 ip daddr 1.1.1.14 tcp dport 993 accept
+
+
+		# CASO: accesso da parte dei client alla porta TCP 443 di internet
+		# Permette richieste alla porta 443 verso internet
+		iif eth1 tcp dport 443 accept
+
+
+		iif lo accept
+	}
+
+	chain OUTPUT {
+		type filter hook output priority 0; policy drop;
+
+
+		# CASO: accesso dai client (rete privata 192.168.0.0/24) verso le porte UDP 53 e 1233 di internet
+		oif eth1 udp dport 53 accept      
+		oif eth1 udp dport 1233 accept
+
+
+		oif lo accept
+	}
+}
+
+# Server ===============================================================================================
+
+table ip filter {
+
+	chain INPUT {
+		type filter hook input priority 0; policy drop;
+
+
+		# CASO: accesso da parte di un host di internet alla porta 25 del server
+		iif eth1 tcp dport 25 accept    
+
+
+		# CASO: il servizio LDAP (porta 389 tcp) del Router deve essere raggiungibile dal Server
+		iif eth1 ip saddr 172.16.15.254 tcp sport 389 ct state established accept  
+
+
+		# CASO: accesso da parte dei client alla porta TCP 993 del server
+		# Permette richieste che arrivano da 1.1.1.1 (interfaccia esposta dal router) alla porta 993 del server
+		iif eth1 ip saddr 1.1.1.1 tcp dport 993 accept
+
+
+		iif lo accept
+	}
+
+	chain OUTPUT {
+		type filter hook output priority 0; policy drop;
+
+
+		# CASO: accesso da parte di un host di internet alla porta 25 del server
+		oif eth1 tcp sport 25 ct state established accept
+
+
+		# CASO: il servizio LDAP (porta 389 tcp) del Router deve essere raggiungibile dal Server
+		oif eth1 ip daddr 172.16.15.254 tcp dport 389 accept  
+
+
+		# CASO: accesso da parte dei client alla porta TCP 993 del server
+        	oif eth1 ip daddr 1.1.1.1 tcp sport 993 ct state established accept   
+
+
+		oif lo accept
+	}
+}
+
+# Router ===============================================================================================
+
+table ip filter {
+
+	chain INPUT {
+        	type filter hook input priority 0; policy drop;
+
+
+        	# CASO: accesso da parte del server alla porta tcp 389 del router        
+        	iif eth2 ip saddr 172.16.0.1 tcp dport 389 accept
+
+
+        	iif lo accept
+	}
+
+	# Poichè verrà fatto il nat prima e dopo, i pacchetti arrivano "puliti" 
+	# ovvero, specificando ip sorgente e ip destinazione giusti
+	
+	chain FORWARD {
+		type filter hook forward priority 0; policy drop;
+
+
+		# IMAP (porta 993) tra eth1 (client) e eth2 (server)
+		iif eth1 oif eth2 ip saddr 172.20.0.0/20 ip daddr 1.1.1.14      tcp dport 993 accept;
+		iif eth2 oif eth1 ip saddr 1.1.1.14      ip daddr 172.20.0.0/20 tcp sport 993 ct state established accept;
+		
+
+		# SMTP (porta 25) tra eth3 (internet) e eth2 (server)
+		iif eth3 oif eth1 ip daddr 1.1.1.14      tcp dport 25 accept;
+		iif eth1 oif eth3 ip saddr 1.1.1.14 ip daddr tcp sport 25 ct state established accept;
+		
+
+		# HTTPS (porta 443) tra eth1 (client) e eth3 (internet)
+		iif eth1 oif eth3 ip saddr 172.20.0.0/20 tcp dport 443 accept;
+		iif eth3 oif eth1 ip saddr 137.204.1.15  tcp sport 443 ct state established accept;
+
+
+        	oif "lo" accept 
+    	}
+    
+    	chain OUTPUT {
+        	type filter hook output priority 0; policy drop;
+
+
+        	# CASO: accesso da parte del server alla porta tcp 389 del router        
+        	oif eth2 ip daddr 172.16.0.1 tcp sport 389 ct state established accept
+
+
+		oif "lo" accept
+	}
+
+}
+# Router (NAT) ==========================================================================================
+
+table nat {
+
+	# Permette di tradurre un IP pubblico in un IP privato
+	# si applica il DNAT, che modifica l'IP di destinazione dei pacchetti in transito
+	# N.B.
+	# il DNAT per 130.136.5.15 -> 172.16.0.1 avviene prima del filtro FORWARD.
+
+	chain PREROUTING {
+		type nat hook prerouting priority dstnat;
+
+
+		# CASO: permette a internet (rete pubblica) di accedere alla porta 25 del server (rete privata)
+		# Intercetta i pacchetti TCP in arrivo sull'interfaccia eth3, destinati all'IP 130.136.5.15 sulla porta 25, 
+		# e li reindirizza all'IP 172.16.0.1 tramite DNAT.
+		iif eth3 ip daddr 130.136.5.15 tcp dport 25 dnat to 172.16.0.1;
+
+
+	}
+    
+	# Permette di tradurre un IP privato in uno pubblico
+	# si applica Source NAT (SNAT), che modifica l'indirizzo IP sorgente.
+	
+	chain POSTROUTING {
+		type nat hook postrouting priority srcnat;
+
+
+		# CASO: permette ai client (rete privata) di fare richieste alla rete pubblica  del server
+			# Client nella rete privata 172.20.0.0/20, server nella rete pubblica 1.1.1.0/28
+			# Se il traffico parte da 172.20.0.0/20 verso 1.1.1.14, cambia l'IP sorgente in 1.1.1.1.
+			# (ip che il router espone verso la rete pubblica del server)
+
+		iif eth1 oif eth2 ip saddr 172.20.0.0/20 ip daddr 1.1.1.14 tcp dport 993 snat to 1.1.1.1;
+
+
+		# CASO: permette a un pacchetto di una rete privata di uscire su internet
+			# Se il pacchetto parte da 127.20.0.0/20 entra da eth1 ed esce da eth3, cambia l'IP sorgente in 137.204.1.15.
+			# (ip che il router espone per l'interfaccia verso internet)
+
+		iif eth1 oif eth3 ip saddr 172.20.0.0/20 tcp dport 443 snat to 137.204.1.5;
+
+
+	}
+}

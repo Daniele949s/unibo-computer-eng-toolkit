@@ -1,1 +1,0 @@
-alert tcp any any -> 172.23.3.0/24 80 ( msg:"Binary exploit detected"; pcre:"/A+B{4}/"; sid:1000501; rev:1; priority:1; )

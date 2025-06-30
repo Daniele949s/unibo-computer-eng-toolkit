@@ -1,5 +1,0 @@
-dn: cn=pre,ou=Groups,dc=labammsis
-objectClass: top
-objectClass: posixGroup
-cn: pre
-gidNumber: 10000

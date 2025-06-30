@@ -1,0 +1,51 @@
+----- SOLUZIONE CICCO -------
+
+SERVER: 
+table ip filter {
+	chain INPUT {
+		type filter hook input priority filter; policy drop;
+		iif eth1 ip daddr 192.168.1.7 tcp dport 25 accept
+		iif eth1 ip daddr 192.168.1.7 ip saddr 192.168.1.1 tcp sport 22 ct state established accept
+	}
+	chain OUTPUT {
+		type filter hook output priority filter; policy drop;
+		oif eth1 ip saddr 192.168.1.7 tcp sport 25 ct state established accept
+		oif eth1 ip saddr 192.168.1.7 ip daddr 192.168.1.1 tcp dport 22 accept
+		
+	}
+}
+
+
+ROUTER: 
+table ip filter {
+	chain FORWARD {
+		type filter hook forward priority filter; policy drop;
+		iif eth3 oif eth2 ip daddr 192.168.1.7 tcp dport 25 accept
+		oif eth3 iif eth2 ip saddr 192.168.1.7 tcp sport 25 ct state established accept
+		
+		iif eth2 oif eth1 ip daddr 10.20.0.100 ip saddr 192.168.1.7 tcp dport 22 accept
+		oif eth2 iif eth1 ip saddr 10.20.0.100 ip daddr 192.168.1.7 tcp sport 22 ct state established accept
+		
+		iif eth1 oif eth3 ip saddr 10.20.0.0/22 accept
+		oif eth1 iif eth3 ip saddr 10.20.0.0/22 ct state established accept
+		}
+		
+	chain INPUT {
+		type filter hook input priority filter; policy drop;
+		}
+		
+	chain OUTPUT {
+		type filter hook output priority filter; policy drop;
+		}
+	}
+
+table ip nat {
+        chain POSTROUTING {
+                type nat hook postrouting priority srcnat; policy drop;
+                iif eth1 oif eth3 ip saddr 10.20.0.0/22 snat to 130.136.1.1
+        }
+        chain PREROUTING {
+        	type nat hook prerouting priority dstnat; policy accept;
+		 iif eth2 oif eth1 ip daddr 192.168.1.1 tcp dport 22 dnat to 110.20.0.100
+    }
+}

@@ -1,9 +1,0 @@
----
-- name: "Playbook primo test"
-  hosts: all
-  become: true
-  tasks:
-    - name: "Add the user'johnd'"
-      ansible.builtin.user:
-        name: johnd
-        comment: John Doe

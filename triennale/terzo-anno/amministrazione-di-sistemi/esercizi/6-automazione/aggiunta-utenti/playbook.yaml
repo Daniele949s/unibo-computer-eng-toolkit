@@ -1,8 +1,0 @@
----
-- name: Provision VM with common tools
-  hosts: all
-  become: true
-  tasks:
-    - name: "Add the user jhond"
-      ansible.builtin.user:
-        name: jhond

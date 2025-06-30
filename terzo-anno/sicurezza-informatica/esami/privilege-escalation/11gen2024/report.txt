@@ -1,0 +1,144 @@
+# Nome: Davide Chirichella
+# Matricola: 0001071414
+# Esercizio: privilege escalation
+
+# DETECTION ==============================================================================
+
+Lo strumento che utilizzerò è "aide" (Advanced Intrusion Detection Environment), uno strumento 
+che monitora l'integrità dei file di sistema, confrontandone lo stato attuale con una "fotografia" iniziale per 
+rilevare modifiche non autorizzate.
+
+1. Imposto su /etc/aide/aide.conf la direttiva per indicare tutte le cartelle potenzialmente modificabili.
+In questo caso, come da traccia:
+
+# @@x_include /etc/aide/aide.conf.d ^[a-zA-Z0-9_-]+$ da commentare...
+
+/usr/bin  f  Full
+/etc/    f Full
+
+2. Avvio aide per fare una "fotografia" dello stato attuale del mio sistema mediante il comando:
+
+sudo aideinit
+
+Potrebbe essere necessario copiare a mano il database con
+
+mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
+
+3. Lancio una scansione con "aide -C -c /etc/aide/aide.conf"
+
+4. Eseguo il programma vulnerabile
+
+5. Eseguo nuovamente una scansione con "aide -C -c /etc/aide/aide.conf"
+
+3. Noto, anche mediante i comandi "getcap" e "getfacl", che il binario fornito ha effettuato le seguenti operazioni:
+
+File: /etc/sudoers
+ Ctime     : 2025-06-22 09:46:31 -0400        | 2025-06-23 13:05:51 -0400
+
+Aggiunta questa riga: spy ALL=(root) NOPASSWD: /usr/bin/tee
+
+File: /usr/bin/grep
+ Ctime     : 2024-11-30 09:21:27 -0500        | 2025-06-23 13:05:51 -0400
+ XAttrs    : num=0                            | num=1
+                                              | [1] security.capability <=> AAAA
+                                              | AgAAAAAAAAAAAAAAAAAAAAA=
+
+Falso positivo
+
+File: /usr/bin/tee
+ Bcount    : 96                               | 104
+ Ctime     : 2025-06-22 09:35:49 -0400        | 2025-06-23 13:05:51 -0400
+ XAttrs    : num=0                            | num=1
+                                              | [1] security.capability <=> AQAA
+                                              | AgIAAAAAAAAAAAAAAAAAAAA=
+
+- Aggiunte delle capability al programma /usr/bin/tee (danno a un processo permessi specifici di root, senza concedere tutti i privilegi di root.) 
+	cap_dac_override=ep
+ovvero la capacità di ignorare i permessi di lettura/scrittura sui file, anche quelli di sistema protetti
+
+Le flag impostate sono di solito:
+e = effective: la capability è attiva e utilizzata per i controlli di accesso
+p = permitted: la capability è concessa al processo
+
+File: /usr/bin/vim.tiny
+ Perm      : -rwxr-xr-x                       | -r-xr-xr-x
+ Ctime     : 2024-11-30 09:21:24 -0500        | 2025-06-23 13:05:51 -0400
+ ACL       : A: user::rwx                     | A: user::r-x
+             A: group::r-x                    | A: group::r-x
+             A: other::r-x                    | A: other::r-x
+
+	
+- Settato il SUID al programma "cp". Adesso, chiunque esegua quel programma 
+lo eseguirà con i privilegi dell'utente proprietario del file, root in questo caso
+
+- Controllo i "processi nascosti" che possono essere stati impostati
+	`systemctl list timers`: Se un timer viene eseguito come root e l’utente può modificare lo script o la directory da cui viene eseguito, è un'escalation diretta.
+	`atq: se un attaccante ha accesso a at e può eseguire job come root (per esempio via sudo o setuid su at), può eseguire un payload.
+	`crontab -i`: È stato definito un cronjob con script scrivibile:
+
+		*/5 * * * * root /opt/scripts/backup.sh
+		# ha permessi root, ma è scrivibile da un utente non privilegiato
+
+		ls -l /opt/scripts/backup.sh
+		-rwxrwxrwx 1 root root 1234 Jun 5 09:00 /opt/scripts/backup.sh
+
+		# se al backup.sh aggiungo la riga:
+		cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash
+		# L’utente user può poi semplicemente lanciare /tmp/rootbash e ottenere una shell root
+
+
+# ATTACK =================================================================================
+
+1. Utilizzo di tee per aggiungere su /etc/passwd un utente con accesso privilegiato
+(backdoor) che può fare login senza password, avrà UID e GID di root (0 entrambi), 
+/root come home directory e /usr/bin/zsh come shell di login.
+
+	hack::0:0:root:/root:/usr/bin/zsh
+
+2. Utilizzo `openssl passwd` per generare l'hash della password `hack`
+
+
+È anche possibile, tramite vim, eseguire comandi direttamente al suo interno con :!
+Possiamo quindi aprire una shell di root con 
+
+	:!/bin/bash
+	
+Se vim è limitato a un file, faccio path traversal
+
+	sudo /usr/bin/vi /var/www/html/../../../etc/shadow
+
+
+2. Si potrebbe anche non aggiungere utenti ma semplicemente settare l'id di un utente a 0, 
+trasformandolo in un utente "root" che ha accesso illimitato al sistema e può eseguire qualsiasi operazione
+
+3. L'utente "intruso" ha i permessi di scrittura con sudoers, il file che specifica quali operazioni un utente 
+può fare con privilegi elevati (es. come root o altri utenti). Per diventare root basterà quindi diventare l'utente intruso 
+(`su intruso`, non chiederà nessuna password come previsto), editare il file /etc/sudoers ed inserire questa riga
+
+intruso ALL=(ALL:ALL) ALL
+
+In questo modo gli sto dicendo che, tramite sudo, "intruso", da QUALSIASI HOST potrà eseguire con i privilegi di QUALSIASI UTENTE
+ QUALSIASI COMANDO. A questo punto, eseguendo il comando `sudo -i`, eseguiamo una shell con privilegi di root e 
+lanciamo il comando id
+
+4. Per settarmi "da solo" dei privilegi:
+
+- Assegno il suid a cp
+
+	chmod u+s /bin/cp
+	ls -al /bin/cpcp /etc/passwd .
+
+	Così potrò copiare il file /etc/shadow e modificarlo
+	
+	cat passwd > pass.rw    # Crea una copia leggibile/scrivibile
+	cat shadow > shad.rw    # Stessa cosa per shad
+
+- Assegno delle acl per dare lettura e scrittura di kali al file sudoers
+	
+	setfacl -m u:kali:rw /etc/sudoers
+	
+- Mi assegno una capability CAP_DAC_OVERRIDE, la capacità di ignorare i permessi di lettura/scrittura 
+sui file, anche quelli di sistema protetti.
+	
+	sudo /usr/sbin/setcap "CAP_DAC_OVERRIDE=eip" /usr/bin/vim.tiny
+

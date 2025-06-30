@@ -1,0 +1,23 @@
+# Nome: Davide Chirichella
+# Matricola: 0001071414
+# Esercizio: network intrusion GG MM AAAA
+
+# ==============================================================================
+
+
+3. Alcuni dei tipi di interazione che ho potuto riconoscere verso il server 10.10.10.10 sono:
+
+- Accesso ssh
+- Probabile attacco ddos sulla porta 80 (da sorgenti diverse)
+- Accesso al terminale remoto tramite telnet 
+- Probabile portscan, in quanto ci sono tante richieste da parte della stessa sorgente a molte
+porte diverse dell'host
+
+Noto inoltre che nel payload dell'accesso tramite telnet c'è una flag:
+FLAG{t his_port_is_dang erous}
+
+2. Scrivo una regola per identificare la flag
+
+4. Dai logs noto che
+
+# ==============================================================================
