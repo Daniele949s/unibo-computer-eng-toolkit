@@ -13,25 +13,23 @@ di A che ridefiniscono il metodo, e D a sua volta eredita sia da B che da C, è 
 	1. Utilizzo di interfacce, le quali specificano solo la firma metodo e non la sua specifica implementazione
 	2. Modello composizione e delega, funziona in questo modo
 		- *composizione*: una classe è "costruita" usando altre classi come componenti
-			```java
-			class Motore  {
-                void accendi() {
-                    System.out.println("Motore acceso");
-                }
-            }
-
-            class Auto {
-                private Motore motore = new Motore(); // composizione, l'auto non È un motore
-
-                void avvia() {
-                    motore.accendi(); // delega a motore
-                }
-            }
-			```
 		- *delega*: un oggetto, invece di svolgere un compito "direttamente" delega a un altro oggetto
+```java
+class Motore  {
+	void accendi() {
+	    System.out.println("Motore acceso");
+	}
+    }
+    class Auto {
+	private Motore motore = new Motore(); // composizione, l'auto non È un motore
 
-# Si esegua una classificazione del polimorfismo secondo Cardelli-Wegner e si mostri l’implementazione
-# del polimorfismo per inclusione.
+	void avvia() {
+	    motore.accendi(); // delega a motore
+	}
+    }
+```
+
+# Si esegua una classificazione del polimorfismo secondo Cardelli-Wegner e si mostri l’implementazione del polimorfismo per inclusione.
 
 Per polimorfismo si intende la capacità di una stessa entità di "apparire" in modo diverso in contesti differenti, o viceversa di apparire
 allo stesso modo in contesti affini.
