@@ -279,8 +279,7 @@ Per comunicare al BOSS, il WORKER sfrutta un delegato che ha i riferimenti a tut
 
 # Concetto di evento in C#
 
-Un evento è un meccanismo che permette a una classe notificare altre entità "interessate" quando qualcosa di significativo accade in seguito
-ad interazione con l'utente o cambiamenti di stato "interni" al programma.
+Un evento è un meccanismo che permette a una classe notificare altre entità "interessate" quando qualcosa di significativo accade in seguito ad interazione con l'utente o cambiamenti di stato "interni" al programma.
 
 Sono più potenti dei delegati in quanto hanno un sistema integrato di *registrazione* e *implementazione privata* 
 
@@ -593,7 +592,7 @@ Incita l'utilizzo di PACKAGE PICCOLI che raggruppano solo le classi che vengono 
 ## Principio delle astrazioni stabili
 
 
-# Pattern SINGLETON con esempi
+# Pattern SINGLETON
 
 Il pattern singleton è un pattern di tipo **creazionale** in cui si vuole garantire che una classe abbia 
 
@@ -629,7 +628,7 @@ public class Singleton {
 }
 ```
 
-# Pattern OBSERVER con esempi
+# Pattern OBSERVER 
 
 È un pattern di tipo **comportamentale** che prevede la presenza di un **Subject** che, in base a certe condizioni, notifica degli **Observer** interessati a conscerne i cambiamenti
 
@@ -689,4 +688,196 @@ Interfaccia: `ISortStrategy` che espone il metodo `int[] sort(int[])`
 Classi concrete specifiche `BubbleSortStrategy` [...]
 
 Il `Cliente` farà riferimento ad un oggetto `IsortStrategy`
+
+# Pattern ADAPTER
+
+È un pattern **strutturale** che serve a far comunicare due classi incompatibili tra di loro.
+
+Ipotizziamo un *client* che utilizza un'interfaccia `Target` già definita che espone un **metodo**, il quale però è definito in una classe `Adaptee` incompatibile con la suddetta interfaccia. 
+
+Si utilizza una classe `Adapter` il cui ruolo è
+
+- Implementare l'interfaccia `Target`
+- "Wrappare" il metodo incompatibile di `Adaptee`
+
+## Esempio
+
+Target: `interface Logger : void log(string)`
+Adaptee: `class OldLogger : void writeLog(string)`
+Adapter: `Adapter implements Logger : voig log(string){ OldLogger.writeLog(string) }`, prende il vecchio logger nel costruttore
+
+# Pattern DECORATOR
+
+È un pattern **strutturale** che serve per aggiungere dinamicamente proprietà agli oggetti.
+
+Risulta più "potente" della semplice ereditarietà in quanto:
+
+- La classe viene estesa a runtime, non a tempo di compilazione
+- Il codice è più pulito, evita classi monolitiche o una gerarchia con troppi sottotipi
+
+L'idea è quella di avere le seguenti entità
+
+- un `Component`, interfaccia che definisce l'oggetto in questione. Esempio: `interface Bevanda`
+
+- un `ConcreteComponent`, implementazioni concrete dell'interfaccia che vogliono essere "decorate". Esempio: `Caffe implements Bevanda`
+
+- un `Decorator`, interfaccia conforme con quella del `Component`, che mantiene un riferimento. Esempio: `abstract class DecoratoreBevanda implements Bevanda`, contiene `protected Bevanda b` 
+
+- un `ConcreteDecorator` che implementa il decorator. Esempio: `class Latte extends DecoratoreBevanda`
+
+```java
+Bevanda b = new Caffe(); // Caffè base
+b = new Latte(b);        // Aggiungi latte
+b = new Zucchero(b);     // Aggiungi zucchero
+```
+
+# Pattern COMPOSITE
+
+È un pattern **strutturale** che permette di gestire delle strutture ad albero, trattando oggetti e gruppi di oggetti allo stesso modo.
+
+Oggetti e Contenitori di oggetti verranno quindi acceduti dal Client allo stesso modo
+
+- `Component` classe **astratta** che dichiara l'interfaccia e definisce **comportamenti comuni** tra oggetti e composizioni
+
+    Contiene il **riferimento al genitore** e la relativa *gestione*
+
+    > Alcune operazioni potrebbero essere prive di significato per le foglie, come Add() e Remove(),
+    dovrebbero avere una realizzazione di default 
+
+    Esempio: `FileSystemItem`, che definisce un metodo `stampaStat()`
+
+
+- `Composite`: Oggetto composto che contiene altri component. Il contenitore dei figli deve essere un attributo di tipo **composite**,  come lista, mappa, etc...
+
+    Esempio: `Cartella`, definisce metodi `add(FileSystemItem)` e `remove()`, e memorizza la lista di `FileSystemITem`.
+
+
+- `Leaf`: oggetti che non possono avere figli
+
+    Esempio: `File`
+
+# Pattern VISITOR
+
+È un pattern **comportamentale** che permette di implementare operazioni custom su delle classi senza andare a toccare il codice della classe stessa.
+
+Esso è in linea con l'**open closed** principle (l'intero sistema consente di essere esteso con nuove operazioni, se rispettano un protocollo) e il **single responsibility** principle, ogni funzionalità / operazione è una classe apposita.
+
+L'idea è che Oggetti diversi **accettano** un visitatore. Il visitatore decide **cosa** fare con ognuno. Gli oggetti non cambiano mai quando aggiungi nuove operazioni.
+
+- `Visitor` classe astratta o interfaccia, dichiara il metodo `Visit(elementA)` per gli specifici elementi su cui esso potrà operare 
+
+    > Esempio: `calcolaArea(Cerchio c), calcolaArea(Rettangolo r)`
+
+- `ConcreteVisitor` implementazione
+
+- `Element` dichiara il metodo `Accept(Visitor)`, permette di essere "esplorata" dal visitor per farci dei calcoli
+
+    > Esempio: `accept(Visitor v)`, poi implementata come `{ v.visita(this) }`, saprà già cosa fare in base al tipo di this
+
+- `ConcreteElement` 
+
+- `ObjectStructure` è realizzata come **Composite** o come una collezione (array, lista, etc.) e deve contentire l’enumerazione dei suoi elementi ; per permettere di essere visitabile da Visitor, ObjectStructure deve implementare un’interfaccia apposita `Visitable`.
+
+Utilizzo: 
+
+```java
+Forma f1 = new Cerchio(3);
+
+FormaVisitor calcolaArea = new CalcolaArea();
+
+f1.accept(calcolaArea);    // calcola area cerchio
+```
+
+# Pattern STATE
+
+È un pattern **comportamentale** che localizza il comportamento specifico di uno stato
+
+Le classi concrete contengono la logica di transizione da uno stato all’altro e il pattern permette anche di emulare
+l’ereditarietà multipla
+
+# Pattern MODEL VIEW CONTROLLER
+
+# Pattern MODEL VIEW PRESENTER
+
+# Pattern ABSTRACT FACTORY
+
+# Modello LMU nei VCS con vantaggi e svantaggi
+
+Un VCS (Version Control System), permette avere pieno controllo dello sviluppo di un progetto, consentendo di tenere traccia del lavoro proprio e di quello in collaborazione con altri e avere pieno controllo delle versioni, potendo anche fare rollback
+
+Il modello `Lock Modify Unlock` fa in modo che per ogni file del repository (la cartella remota dove sono memorizzati i dati correnti e passati del progetto) venga esplicitamente dichiarato se si sta modificando un file, così bloccandolo alla modifica di tutti gli altri. Terminate le modifiche, sarà nuovamente accessibile per la modifica.
+
+### Problemi:
+
+- **Falso senso di sicurezza**: se due sviluppatori modificano indipendentemente due file che "dipendono" l'uno dall'altro, comunque potrebbero esserci conflitti
+
+- **Serializzazione inutile**: nella stragrande maggioranza dei casi, la modifica simultanea di un file non porta conflitti
+
+- **Dimenticanze**: Se uno dimentica la "flag" su un file che ha terminato di modificare ci sono rallentamenti
+
+### Quando conviene?
+
+- Edit di file non modificabili simultaneamente / non unibili, come binari o immagini
+
+# Modello CMM nei VCS con vantaggi e svantaggi
+
+Il modelllo CMM `Copy, Modify, Merge`, consente di poteer modifcare i file in una repository senza nessun meccanismo di lock - unlock.
+In particolare:
+
+1. Check out: viene presa una copia dei file dal repository 
+2. edit: vengono modificati i file
+3. Check in: viene fatto un **merge** (unione) tra le modifiche dell'utente e quelle degli altri utenti. Questa operazione può avere esito:
+
+    - POSITIVO: nessun conflitto tra i file
+    - NEGATIVO: conflitti che vanno risolti a mano.
+
+Questa, ovviamente, non è una garanzia di funzionamento dell'applicativo. 
+
+### Vantaggi
+
+- Possibilità di modificare un file in parallelo senza doversi aspettare a vicenda
+
+- La risoluzione manuale dei conflitti è comunque meno onerosa rispetto al blocco, modifica, sblocco
+
+- Conflitti rari
+
+### Quando non conviene?
+
+- File non unibili (unmergeable) come immagini o binari.
+
+# Spiegare il modello a cascata e le sue criticità.
+
+Il modello a cascata è un modello di sviluppo software che passa attraverso queste 7 fasi, ognuna delle quali va svolta in maniera esaustiva:
+
+1. studio di fattibilità
+2. analisi dei requisiti
+3. analisi del problema
+4. progettazione
+5. implementazione
+6. collaudo
+7. manutenzione
+
+Per rendere questo modello efficace c'è bisogno di definire:
+
+- **Semilavorati**: È come una pipeline composta da documenti, codici, sistema che vengono passati alla fase successiva
+
+- **Date**: le scadenze entro cui vanno prodotti i semilavorati, così da tracciare il progresso del lavoro (workflow)
+
+### Quando è utile?
+
+- Immobilità dei requisiti: ovvero si sanno chiaramente i req. iniziali dell'applicazione
+
+- Immutabilità del progetto: progettare l’intero sistema prima di avere scritto codice risulta possibile
+
+Spesso, è utile avere **forme limitate di retroazione** tra i livelli e un **throw away prototype**, dal quale poi verrà costruito il sistema reale rispettando il modello a cascata (COSTOSO)
+
+### Svantaggi
+
+- I requisiti cambiano nel tempo
+
+- Il progetto spesso va revisionato
+
+# Spiegare il modello a cascata e il modello iterativo
+
+> Modello a cascata detto sopra
 
