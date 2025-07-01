@@ -518,7 +518,9 @@ Per farlo si occorre all'ereditarietà:
 
 # Principio di sostituibilità di Liskov con almeno un esempio
 
-Il principio di sostituibilità di Liskov ha diverse formulazioni, una forte e una più debole:
+Il principio di sostituibilità di Liskov afferma che un cliente che usa istanze di una certa classe A deve poter usare istanze di una qualsiasi sottoclasse di A senza accorgersi della differenza
+
+formalmente, le formulazioni sono due, una forte e una più debole:
 
 - **Debole**: ogni istanza della superclasse (classe padre, detta anche classe "base"), deve essere associata all'istanza di una sottoclasse (figlia)
 
@@ -560,16 +562,97 @@ Ora ogni sottoclasse fa ciò che ha senso, e può sostituire il suo tipo padre s
 
 ## REP: Principio di Equivalenza Rilascio
 
+Ogni package che viene rilasciato al pubblico dovrebbe essere opportunamente **manutenuto** e gestito da un **sistema di rilascio** , e i clienti non dovrebbero utilizzare quelli senza manutenzione 
 
+> anche le edizioni precedenti vanno manutenute e versionate
+
+Occorre raggruppare classi in package (che sono l'**unità di rilascio** in Java) così da garantire il riutilizzo di una o più classi
 
 ## CCP: Principio di Chiusura Comune
 
+Rilasciare un package significa garantire che tutte le classi in esso contenute siano opportunamente testate 
+
+L'uso dei package dovrebbe essere ridotto al minimo. Ognuno di essi deve contenere tutte le classi che vengono modificate insieme, così da rendere facile modifica di ognuna di esse riducendo al **minimo il numero di package modificati in ogni ciclo di rilascio**
+
+Incita l'utilizzo di PACKAGE GRANDI, utile solo in fase iniziale per "semplificare la vita" ai manutentori, poi sarà necessario un refactoring
+
 ## CRP: Principio di Riutilizzo Comune
 
-Per le relazioni tra package, ricordiamo invece:
+Una dipendenza da un package, implica una dipendenza da tutto ciò che è nel package.
+
+Ad ogni rilascio, gli utilizzatori del package devono controllare la compatibilità con tutto ciò che è in esso, anche se non lo usano
+
+Incita l'utilizzo di PACKAGE PICCOLI che raggruppano solo le classi che vengono riutilizzate insieme
+
+> Per le relazioni tra package, ricordiamo invece:
 
 ## Principio delle dipendenze acicliche
 
 ## Principio delle dipendenze stabili
 
 ## Principio delle astrazioni stabili
+
+
+# Pattern SINGLETON con esempi
+
+Il pattern singleton è un pattern di tipo **creazionale** in cui si vuole garantire che una classe abbia 
+
+- un'**unica istanza** controllata
+- un punto di accesso globale a tale istanza 
+- intercettare tutte le richieste di creazione garantendo che non ce ne siano altre
+
+Esso è composto da un **costruttore vuoto privato** e un unico metodo **statico** `getInstance()` che restituisce l'istanza "protetta", creandola solo se non c'è già
+
+Una classe con soli membri statici non è un'alternativa valida, perchè 
+
+- non permette di creare istanze personalizzate in base al contesto
+- non permette un numero di interfacce arbitrarie
+
+## Esempio
+
+```java
+public class Singleton {
+    private static Singleton istanzaUnica;
+
+    // Costruttore privato
+    private Singleton() {}
+
+    public static Singleton getInstance() {
+        if (istanzaUnica == null) {
+            istanzaUnica = new Singleton();
+        }
+        return istanzaUnica;
+    }
+
+    public void doSomething() {
+    }
+}
+```
+
+# Pattern OBSERVER con esempi
+
+È un pattern di tipo **comportamentale** che prevede la presenza di un **Subject** che, in base a certe condizioni, notifica degli **Observer** interessati a conscerne i cambiamenti
+
+- `Subject`:
+
+    `Attach(observer)`, `Detach(observer)`: rispettivamente i metodi per registrarsi e deregistrarsi dal subject che mantiene un riferimento agli observer da notificare
+    
+    `Notify()`: chiama il metodo `update()`  di tutti gli observer da notificare
+
+- `Observer`: Metodo `update()`, la logica di business specifica dopo aver ricevuto la notifica da un evento
+
+Esso può essere implementato in modi diversi:
+
+- **class based**: Ogni subject ha il riferimento diretto agli observer
+
+- **interface based**: Ogni subject ha il riferimento all'interfacca che i diversi Observer concreti implementeranno (ci piace, disaccoppiamento tramite interfaccia)
+
+- **delegate based**: Ogni subject ha un delegato pubblico, in modo tale che gli observer possano registrarsi al delegato ed essere notificati da lì indirettamente
+
+- **event based**: Un event si occupa di effettuare il `detach` degli observer
+
+## Esempio
+
+Dispositivi IOT
+
+# Patter FLYWEIGHT
