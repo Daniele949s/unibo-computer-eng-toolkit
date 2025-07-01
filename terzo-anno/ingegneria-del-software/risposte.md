@@ -653,6 +653,40 @@ Esso può essere implementato in modi diversi:
 
 ## Esempio
 
-Dispositivi IOT
+Dispositivi IoT 
 
 # Patter FLYWEIGHT
+
+Il pattern Flyweight è un pattern **strutturale** viene applicato quando si gestiscono oggetti leggeri (a granularità molto fine) e per i quali non si vogliono sprecare risorse
+istanziando ogni volta lo stesso oggetto, ma comunque si vuole poterlo "personalizzare" in base all'utilizzo
+
+Un **flyweight**  è un oggetto condiviso utilizzato da più *client* simultaneamente, la cui condivisione è garantita da un **FlyweightFactory**.
+
+Esso, benchè condiviso, deve essere **indistinguibile** da un oggetto non condiviso.
+
+Esso può avere due stati:
+
+    - **stato intrinseco**: la parte condivisibile e costante, è interna all'oggetto e visualizzata da tutti i client
+    
+    - **stato estrinseco**: la parte variabile, viene passata esternamente
+    
+## Esempio
+
+Carattere
+
+# Pattern STRATEGY
+
+È un pattern di tipo **comportamentale**. Esso viene utilizzato quando si ha una famiglia di algoritmi che vengono utilizzati per svolgere la stessa funzionalità
+
+Per perseguire questo scopo si definisce un'**interfaccia** che espone il metodo, e poi si creano le rispettive **classi concrete** che implementano il metodo secondo il proprio algoritmo specifico
+
+Un cliente quindi potrà dipendere unicamente dall'interfaccia, senza fare assunzioni sulla "strategia" specifica verrà adottata per il compito
+
+## Esempio
+
+Interfaccia: `ISortStrategy` che espone il metodo `int[] sort(int[])`
+
+Classi concrete specifiche `BubbleSortStrategy` [...]
+
+Il `Cliente` farà riferimento ad un oggetto `IsortStrategy`
+
