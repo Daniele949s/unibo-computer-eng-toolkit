@@ -4,7 +4,7 @@
 ## Modulo 1.1
 - [Come viene implementata l’ereditarietà multipla?](#come-viene-implementata-lereditarietà-multipla)
 - [Si esegua una classificazione del polimorfismo secondo Cardelli-Wegner e si mostri l’implementazione del polimorfismo per inclusione.](#si-esegua-una-classificazione-del-polimorfismo-secondo-cardelli-wegner-e-si-mostri-limplementazione-del-polimorfismo-per-inclusione)
-- [Differenze tra interfaccia e classe astratta](#differennze-tra-interfaccia-e-classe-astratta)
+- [Differenze tra interfaccia e classe astratta](#differenze-tra-interfaccia-e-classe-astratta)
 - [Ciclo di vita di un oggetto esemplificandone i passi utilizzando uno specifico linguaggio OO](#ciclo-di-vita-di-un-oggetto-esemplificandone-i-passi-utilizzando-uno-specifico-linguaggio-oo)
 
 ## Modulo 1.2
