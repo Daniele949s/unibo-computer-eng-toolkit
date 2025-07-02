@@ -1,3 +1,48 @@
+
+# Indice
+
+- [Come viene implementata l’ereditarietà multipla?](#come-viene-implementata-lereditarietà-multipla)
+- [Si esegua una classificazione del polimorfismo secondo Cardelli-Wegner e si mostri l’implementazione del polimorfismo per inclusione.](#si-esegua-una-classificazione-del-polimorfismo-secondo-cardelli-wegner-e-si-mostri-limplementazione-del-polimorfismo-per-inclusione)
+- [Procedimento di compilazione ed esecuzione del codice all’interno del framework .NET tramite il CLR.](#procedimento-di-compilazione-ed-esecuzione-del-codice-allinterno-del-framework-net-tramite-il-clr)
+- [Differenza tra tipi valore e tipi riferimento in .NET](#differenza-tra-tipi-valore-e-tipi-riferimento-in-net)
+- [Garbage collector in C#](#garbage-collector-in-c)
+- [Concetto di delegato in C#](#concetto-di-delegato-in-c)
+- [Concetto di evento in C#](#concetto-di-evento-in-c)
+- [Metaprogrammazione e riflessione in C#](#metaprogrammazione-e-riflessione-in-c)
+- [Spiegare i quattro bad design (fragilità, immobilità, rigidità, viscosità)](#spiegare-i-quattro-bad-design-fragilità-immobilità-rigidità-viscosità)
+- [Principio di singola responsabilità con almeno un esempio](#principio-di-singola-responsabilità-con-almeno-un-esempio)
+- [Principio di inversione delle dipendenze con almeno un esempio](#principio-di-inversione-delle-dipendenze-con-almeno-un-esempio)
+- [Principio di segregazione delle interfacce con almeno un esempio](#principio-di-segregazione-delle-interfacce-con-almeno-un-esempio)
+- [Principio aperto/chiuso con almeno un esempio](#principio-aperto-chiuso-con-almeno-un-esempio)
+- [Principio di sostituibilità di Liskov con almeno un esempio](#principio-di-sostituibilità-di-liskov-con-almeno-un-esempio)
+- [Principi per l’architettura dei package](#principi-per-larchitettura-dei-package)
+- [Pattern SINGLETON](#pattern-singleton)
+- [Pattern OBSERVER](#pattern-observer)
+- [Pattern FLYWEIGHT](#pattern-flyweight)
+- [Pattern STRATEGY](#pattern-strategy)
+- [Pattern ADAPTER](#pattern-adapter)
+- [Pattern DECORATOR](#pattern-decorator)
+- [Pattern COMPOSITE](#pattern-composite)
+- [Pattern VISITOR](#pattern-visitor)
+- [Pattern STATE](#pattern-state)
+- [Pattern MODEL VIEW CONTROLLER](#pattern-model-view-controller)
+- [Pattern MODEL VIEW PRESENTER](#pattern-model-view-presenter)
+- [Pattern ABSTRACT FACTORY](#pattern-abstract-factory)
+- [Qualità di un buon software](#qualità-di-un-buon-software)
+- [Modello LMU nei VCS con vantaggi e svantaggi](#modello-lmu-nei-vcs-con-vantaggi-e-svantaggi)
+- [Modello CMM nei VCS con vantaggi e svantaggi](#modello-cmm-nei-vcs-con-vantaggi-e-svantaggi)
+- [Spiegare il modello a cascata e le sue criticità.](#spiegare-il-modello-a-cascata-e-le-sue-criticità)
+- [Spiegare il modello a cascata e il modello iterativo](#spiegare-il-modello-a-cascata-e-il-modello-iterativo)
+- [Illustrare RUP](#illustrare-rup)
+- [Tipologie di requisiti](#tipologie-di-requisiti)
+- [Si illustri brevemente il ciclo di vita della valutazione del rischio](#si-illustri-brevemente-il-ciclo-di-vita-della-valutazione-del-rischio)
+- [Principali categorie di requisiti per la sicurezza](#principali-categorie-di-requisiti-per-la-sicurezza)
+- [Linee guida di progettazione nella sicurezza](#linee-guida-di-progettazione-nella-sicurezza)
+- [White box e black box testing](#white-box-e-black-box-testing)
+- [Capacità di sopravvivenza del sistema](#capacità-di-sopravvivenza-del-sistema)
+
+---
+
 # Come viene implementata l’ereditarietà multipla?
 
 Innanzitutto, con "ereditarietà" si intende la relazione tra due oggetti A e B in cui, se B eredita dalla classe A allora B è sottoclasse e A è superclasse.
@@ -790,16 +835,31 @@ f1.accept(calcolaArea);    // calcola area cerchio
 
 # Pattern STATE
 
-È un pattern **comportamentale** che localizza il comportamento specifico di uno stato
+È un pattern **comportamentale** che localizza il comportamento specifico di uno stato, permettendo a un componente di cambiare comportamento a seconda del suo stato interno.
 
 Le classi concrete contengono la logica di transizione da uno stato all’altro e il pattern permette anche di emulare
 l’ereditarietà multipla
+
+`Context`: mantiene un riferimento allo stato corrente e lo delega
+
+`State`e`ConcreteState`: metodi comuni a tutti gli stati e le loro implementazioni
+
+```java
+interface Stato {
+    void muovi(Giocatore g)
+}
+
+```
 
 # Pattern MODEL VIEW CONTROLLER
 
 # Pattern MODEL VIEW PRESENTER
 
 # Pattern ABSTRACT FACTORY
+
+# Qualità di un buon software
+
+# 
 
 # Modello LMU nei VCS con vantaggi e svantaggi
 
@@ -881,3 +941,168 @@ Spesso, è utile avere **forme limitate di retroazione** tra i livelli e un **th
 
 > Modello a cascata detto sopra
 
+Il modello iterativo, invece, prevede dei passi che sono via via più specifici, aumentando di volta in volta il livello di dettaglio del sistema. Esempio *RUP*
+
+# Illustrare RUP
+
+È un modello di sviluppo software iterativo ed ibrido pensato per software di grandi dimensioni
+
+## Prospettiva Dinamica
+
+## Prospettiva Pratica
+
+## Prospettiva Statica
+
+# Tipologie di requisiti
+
+I requisiti di un particolare applicativo software descrivono i servizi che esso deve fornire e i loro rispettivi vincoli. 
+
+SOno di 3 tipi principali:
+
+## Utente
+
+Brevi, scritti in linguaggio naturale e ad alto livello. Specificano **vincoli** del sistema e **condizioni** attorno a cui opera.
+
+## Di sistema
+
+Uguali a prima ma più dettagliati:
+
+### Funzionali
+
+Elenca i servizi che il sistema deve fornire, come comportarsi in base a certi input, come comportarsi in specifiche situazioni, cosa il sistema non dovrebbe fare.
+
+### Non funzionali
+
+Robe più specifiche, come:
+
+**requisiti del prodotto**: limitazioni alle proprietà del sistema
+
+**requisiti organizzativi**: vincoli al processo di sviluppo
+
+**requisiti esterni**: privacy, etica etc... possono andare in conflitto con altri (es. facilità d'uso)
+
+### Di dominio
+
+Indicano il funzionamento del sistema all'interno dello specifico dominio
+
+# Si illustri brevemente il ciclo di vita della valutazione del rischio
+
+Serve a bilanciare eventuali perdite dovute ad attacchi informatici andati a segno grazie a  lacune di sicurezza del prodotto software.
+
+La valutazione del rischio è composta da 2 fasi:
+
+## Valutazione preliminare del rischio:
+
+Vengono determinati i **requisiti di sicurezza** dell'applicazione.
+
+## Ciclo di vita della valutazione del rischio:
+
+Essa avviene parallelamente al ciclo di vita dello sviluppo di un software, non è un optional.
+
+1. **precondizioni**: aver capito quali sono le piattaforme in uso, in particolare il middleware e la strategia di sviluppo del sistema
+
+2. **identificazione del bene**: risorse FISICHE e LOGICHE e le DIPENDENZE tra i due
+
+3. **identificazione delle minacce**: cosa NON DEVE POTER ACCADERE nel sistema
+
+# Principali categorie di requisiti per la sicurezza
+
+Lo scopo è di definire quali comportamenti risultano inaccettabili per il sistema
+
+### identificzazione
+
+specificano se un sistema deve eseguire l'identificazione degli utenti
+
+### autenticazione
+
+modalità di autenticazione degli utenti
+
+### autorizzazione
+
+cosa un utente può / non può fare
+
+### integrità
+
+spiecificano i meccanismi per evitare corruzioni di dati
+
+### immunità
+
+meccanismi per garantire difese da malware
+
+### scoperta delle intrusioni
+
+self-explained
+
+### non-ripudiazione
+
+una delle due parti delle transazioni non può dire di non aevr partecipato
+
+### riservatezza
+
+delle informazioni
+
+### controllo della protezione
+
+utulizzo del sistema controllato e verificato
+
+### protezione della manutenzione del sistema
+
+se vengono rotti i meccanismi di protezione, come un'app può annullare modifiche?
+
+# Linee guida di progettazione nella sicurezza
+
+1. Redigere un documento esplicito che specifichi precisamente tutte le politiche di sicurezza, ma non COME applicarle (i meccanismi)
+
+2. Evitare ogni singolo punto di fallimento che potrebbe dare criticità al sistema. Se fallisse, farlo in modo controllato
+
+3. Adottare il principio del "Minimo privilegio", ovvero gli utenti di default dovrebbero avere solo i privilegi necessari
+
+4. Deployment conttollato
+
+5. Validazione e sanificazione di input per evitare BOF e SQLi
+
+6. Bilanciare sempre sicurezza e usabilità
+
+7. Garantire due principi
+
+    - **ridondanza**: più versioni della stessa entità
+    - **diversità**: tecnologie diverse per varie componenti
+    
+8. Organizzare le informazioni in "compartimenti" ai quali gli utenti possono accedere
+
+9. Metodi adeguati per il rollback e ripristini in caso di errori
+
+# White box e black box testing
+1. **black box**, test a scatola chiusa, senza sapere il codice sorgente come farebbe un vero attaccante:
+
+    - utile per test di performance, e di affidabilità del sistema
+    - perdita di tempo per sicurezza
+
+2. **white box**: consci del codice, revisione ad hoc del sistema
+    
+    - vulnerabilità
+    - leggibilità e modularità del codice
+
+# Capacità di sopravvivenza del sistema
+
+Per capacità di sopravvivenza del sistema si intende l'abilità di quest'ultimo di riuscire ad erogare un servizio anche sotto attacco o con componenti danneggiate.
+
+Esso non riguarda solo i singoli componenti, ma l'*intero sistema*. Risulta cruciale sopratutto perchè spesso beni economici / personali dipendono da esso.
+
+A tale scopo è stato ideato il **Survivable Analysis System** che struttura la sopravvivenza di un sistema in base a 4 fasi, mosse da 3 principi:
+
+- `Identificazione`: **individuare** problemi grazie a un sistema che riconosce eventuali attacchi e fallimenti, **valutandone** il danno.
+
+- `Resistenza`: **respingere** attacchi
+
+- `Ripristino`: **garantire** il funzionamento nonostante l'attacco e **ripristinare** i servizi dopo l'attacco
+
+Le 4 fasi sono:
+
+- **comprensione del sistema**: tutta l'architettura con le sue componenti va analizzata nel dettaglio per comprenderne tutti i servizi
+
+- **identificazione servizi critici**: dopo aver analizzato l'architettura si identificano i servizi a rischio, con tutte le possibilità di attacco sia dirette che trasversali
+
+- **simulazione attacchi**: simulando attachi individuando i casi d'uso e componenti soggetti agli attacchi
+
+- **analisi della sopravvivenza**: vedere se il sistema è riuscito bene a identificare un tentativo di attacco e a bloccarlo con successo, ed eventualmente a ripristinarsi in caso fossero stati sotto attacco
