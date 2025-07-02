@@ -563,7 +563,7 @@ dello sviluppatore a causa del rischio di guasto che porta con sè una modifica
 
 2. **Immobilità**: Un software immobile è tipicamente poco modulare, i componenti non sono facilmente riutilizzabili per scopi affini, in
 quanto risultano troppo accoppiati con altre parti del sistema. Quindi, per uno sviluppatore, spesso l'idea più
-sensata è riscrivere dacccapo quel particolare modulo "rigido", piuttosto che contro i principi di riusabilità del software
+sensata è riscrivere dacccapo quel particolare modulo "rigido", rendendolo quindi inutile al di fuori del proprio "recinto", contro i principi di riusabilità del software
 
 3. **Rigidità**: Si parla di rigidità quando una modifica di un elemento comporta la modifica di tutte le sue dipendenze
 a cascata, rendendo quindi oneroso apportare delle modifiche al software, con la conseguente procrastinazione della cosa da parte
