@@ -576,6 +576,26 @@ opzione. Le cause possono essere legate:
     - al design che, per "costituzione", rende difficile l'aggiunta di modifiche coerenti
     - all'ambiente, magari a causa di sistemi hardware inefficienti, sistemi di test lenti e VCS macchinosi
     
+# Fattori di qualità di un buon software
+
+- **correttezza**: adempie ai suoi compiti correttamente
+
+- **robustezza**: si comporta bene anche in situazioni anomale o impreviste, non crasha
+
+- **affidabilità**: i sistemi / persone che dipendono dall'architettura riescono a farci pienamente affidamento
+
+- **estendibilità**: il design permette di aggiungere facilmente modifiche non previste
+
+- **riusabilità**: utilizzabile da altri programmi facilmente, ben integrabile
+
+- **facilità d'uso**: si spiega da solo
+
+- **efficienza**: buon uso delle tecnologie
+
+- **verificabilià**: si sottopone bene ai test
+
+- **portabilità**: si adatta alle varie piattaforme
+    
 # Principio di singola responsabilità con almeno un esempio
 
 La "responsabilità" non è altro che un motivo che una classe ha per cambiare. Ogni classe dovrebbe avere un solo motivo per cambiare.
@@ -735,7 +755,6 @@ Incita l'utilizzo di PACKAGE PICCOLI che raggruppano solo le classi che vengono 
 ## Principio delle dipendenze stabili
 
 ## Principio delle astrazioni stabili
-
 
 # Pattern SINGLETON
 
@@ -985,27 +1004,11 @@ Gestisce input dall'utente e mappa le azioni in comandi. Aggiorna la view.
 
 # Pattern ABSTRACT FACTORY
 
+È un design pattern **creazionale** che serve a creare famiglie di oggetti correlati fra loro.
 
+L'obiettivo è separare la **creazione** degli oggetti dal loro **utilizzo**
 
-# Fattori di qualità di un buon software
-
-- **correttezza**: adempie ai suoi compiti correttamente
-
-- **robustezza**: si comporta bene anche in situazioni anomale o impreviste, non crasha
-
-- **affidabilità**: i sistemi / persone che dipendono dall'architettura riescono a farci pienamente affidamento
-
-- **estendibilità**: il design permette di aggiungere facilmente modifiche non previste
-
-- **riusabilità**: utilizzabile da altri programmi facilmente, ben integrabile
-
-- **facilità d'uso**: si spiega da solo
-
-- **efficienza**: buon uso delle tecnologie
-
-- **verificabilià**: si sottopone bene ai test
-
-- **portabilità**: si adatta alle varie piattaforme
+Basta avere un' `Interfaccia` detta `AbstractFactory`, ad esempio `CarFactory : Motore creaMotore(), Telaio creaTelaio()` che "produce i pezzi". I factory concreti la implementeranno, ad esempio per l'auto elettrica oppure a benzina. `Auto` potrà prendere un `CarFactory` come parametro e creare motore e telaio. 
 
 # Modello LMU nei VCS con vantaggi e svantaggi
 
@@ -1095,9 +1098,60 @@ Il modello iterativo, invece, prevede dei passi che sono via via più specifici,
 
 ## Prospettiva Dinamica
 
-## Prospettiva Pratica
+### Avvio 
+
+delineare il business case, agenti **esterni** (a chi ci si rivolge) ed il **mercato**
+
+### Elaborazione
+
+Definisce l'architettura complessiva del sistema. È importante arrivare ad
+
+- aver determinato almeno l'80% dei casi d'uso
+- descrizione architettura iniziale
+- sviluppo architettura
+- architettura che copre casi d'uso principali eseguibile funzionante
+- revisione business case 
+- pianificazione progetto complessivo
+
+### Costruzione
+
+Progettazione, programmazione e collaudo del sistema. Alla fine di questa fase il sistema dovrebbe essere **funzionante** e la documentazione **pronta**
+
+Le parti vengono sviluppate in **parallelo**, poi integrate fra di loro
+
+### Transizione
+
+dall'ambiente di sviluppo a quello di beta testing
 
 ## Prospettiva Statica
+
+Si focalizza sulle attività di **PRODUZIONE DEL SOFTWARE** (workflow), di cui abbiamo
+
+### 6 workflow principali
+
+1. Modellazione attività aziendali: 
+2. Requisiti:
+3. Attività e progetto: viene creato un *modello di progetto*
+4. Implementazione:
+5. Test:
+6. Rilascio:
+
+### 3 di supporto
+
+1. Gestione configurazione e modifiche: gestione dei *cambiamenti* del sistema
+2. gestione del progetto: gestione dello *sviluppo* del sistema
+3. Ambiente: strumenti adeguati agli sviluppatori
+
+## Prospettiva Pratica
+
+Sono le **BUONE PRASSI** da seguire nello sviluppo dei sistemi
+
+1. Sviluppo ciclico del software: con scala di priorità
+2. Gestione dei requisiti: documenta ogni scelta del cliente
+3. Uso architetture a componenti: modularità
+4. Modelli visivi: come UML
+5. Verifica qualità del software: 
+6. Controllo modifiche: tramite strumenti
 
 # Tipologie di requisiti
 
@@ -1249,6 +1303,6 @@ Le 4 fasi sono:
 
 - **identificazione servizi critici**: dopo aver analizzato l'architettura si identificano i servizi a rischio, con tutte le possibilità di attacco sia dirette che trasversali
 
-- **simulazione attacchi**: simulando attachi individuando i casi d'uso e componenti soggetti agli attacchi
+- **simulazione attacchi**: simulando attachi, individuando i casi d'uso e componenti soggetti agli attacchi
 
 - **analisi della sopravvivenza**: vedere se il sistema è riuscito bene a identificare un tentativo di attacco e a bloccarlo con successo, ed eventualmente a ripristinarsi in caso fossero stati sotto attacco
