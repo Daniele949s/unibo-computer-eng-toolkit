@@ -22,7 +22,7 @@
 - [Principio di singola responsabilità con almeno un esempio](#principio-di-singola-responsabilità-con-almeno-un-esempio)
 - [Principio di inversione delle dipendenze con almeno un esempio](#principio-di-inversione-delle-dipendenze-con-almeno-un-esempio)
 - [Principio di segregazione delle interfacce con almeno un esempio](#principio-di-segregazione-delle-interfacce-con-almeno-un-esempio)
-- [Principio aperto/chiuso con almeno un esempio](#principio-aperto-chiuso-con-almeno-un-esempio)
+- [Principio aperto-chiuso con almeno un esempio](#principio-aperto/chiuso-con-almeno-un-esempio)
 - [Principio di sostituibilità di Liskov con almeno un esempio](#principio-di-sostituibilità-di-liskov-con-almeno-un-esempio)
 - [Principi per l’architettura dei package](#principi-per-larchitettura-dei-package)
 
