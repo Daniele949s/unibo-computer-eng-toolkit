@@ -1,21 +1,32 @@
 
 # Indice
 
+## Modulo 1.1
 - [Come viene implementata l’ereditarietà multipla?](#come-viene-implementata-lereditarietà-multipla)
 - [Si esegua una classificazione del polimorfismo secondo Cardelli-Wegner e si mostri l’implementazione del polimorfismo per inclusione.](#si-esegua-una-classificazione-del-polimorfismo-secondo-cardelli-wegner-e-si-mostri-limplementazione-del-polimorfismo-per-inclusione)
+- [Differenze tra interfaccia e classe astratta](#differennze-tra-interfaccia-e-classe-astratta)
+- [Ciclo di vita di un oggetto esemplificandone i passi utilizzando uno specifico linguaggio OO](#ciclo-di-vita-di-un-oggetto-esemplificandone-i-passi-utilizzando-uno-specifico-linguaggio-oo)
+
+## Modulo 1.2
+- [Tecnologia COM e Framework .NET](#tecnologia-com-e-framework-net)
 - [Procedimento di compilazione ed esecuzione del codice all’interno del framework .NET tramite il CLR.](#procedimento-di-compilazione-ed-esecuzione-del-codice-allinterno-del-framework-net-tramite-il-clr)
 - [Differenza tra tipi valore e tipi riferimento in .NET](#differenza-tra-tipi-valore-e-tipi-riferimento-in-net)
 - [Garbage collector in C#](#garbage-collector-in-c)
 - [Concetto di delegato in C#](#concetto-di-delegato-in-c)
 - [Concetto di evento in C#](#concetto-di-evento-in-c)
 - [Metaprogrammazione e riflessione in C#](#metaprogrammazione-e-riflessione-in-c)
+
+## Modulo 1.3
 - [Spiegare i quattro bad design (fragilità, immobilità, rigidità, viscosità)](#spiegare-i-quattro-bad-design-fragilità-immobilità-rigidità-viscosità)
+- [Fattori di qualità di un buon software](#fattori-di-qualità-di-un-buon-software)
 - [Principio di singola responsabilità con almeno un esempio](#principio-di-singola-responsabilità-con-almeno-un-esempio)
 - [Principio di inversione delle dipendenze con almeno un esempio](#principio-di-inversione-delle-dipendenze-con-almeno-un-esempio)
 - [Principio di segregazione delle interfacce con almeno un esempio](#principio-di-segregazione-delle-interfacce-con-almeno-un-esempio)
 - [Principio aperto/chiuso con almeno un esempio](#principio-aperto-chiuso-con-almeno-un-esempio)
 - [Principio di sostituibilità di Liskov con almeno un esempio](#principio-di-sostituibilità-di-liskov-con-almeno-un-esempio)
 - [Principi per l’architettura dei package](#principi-per-larchitettura-dei-package)
+
+## Modulo 1.4 (design pattern)
 - [Pattern SINGLETON](#pattern-singleton)
 - [Pattern OBSERVER](#pattern-observer)
 - [Pattern FLYWEIGHT](#pattern-flyweight)
@@ -28,9 +39,12 @@
 - [Pattern MODEL VIEW CONTROLLER](#pattern-model-view-controller)
 - [Pattern MODEL VIEW PRESENTER](#pattern-model-view-presenter)
 - [Pattern ABSTRACT FACTORY](#pattern-abstract-factory)
-- [Qualità di un buon software](#qualità-di-un-buon-software)
+
+## Modulo 1.5
 - [Modello LMU nei VCS con vantaggi e svantaggi](#modello-lmu-nei-vcs-con-vantaggi-e-svantaggi)
 - [Modello CMM nei VCS con vantaggi e svantaggi](#modello-cmm-nei-vcs-con-vantaggi-e-svantaggi)
+
+## Modulo 2
 - [Spiegare il modello a cascata e le sue criticità.](#spiegare-il-modello-a-cascata-e-le-sue-criticità)
 - [Spiegare il modello a cascata e il modello iterativo](#spiegare-il-modello-a-cascata-e-il-modello-iterativo)
 - [Illustrare RUP](#illustrare-rup)
@@ -137,6 +151,92 @@ Le entità possono assumere un numero limitato di forme.
 #### Coercion
 - Consente la **conversione implicita** del tipo di una variabile in un altro.
 - La specifica delle conversioni possibili deve avvenire in fase di programmazione
+
+# Differenze tra interfaccia e classe astratta
+
+## Interfaccia
+#### SCOPO
+
+Descrive una **funzionalità semplice** che può essere implementata da classi **eterogenee**. È come un "procotollo" da rispettare per le classi che lo utilizzano.
+
+Esempio: tutte le classi che implementano l'interfaccia ICloneable sono clonabili, e possono essere classi di qualsiasi natura
+
+#### STRUTTURA
+
+Un insieme di metodi senza alcuna implementazione, che devono necessariamente essere definiti da tutte le classi che implementano l'interfaccia
+
+Nessuno stato interno
+
+Non c'è possibilità di usare metodi statici
+
+Deve essere stabile (come dettato dall'OCP)
+
+#### RELAZIONI con altre classi
+
+Può estendere 0+ interfacce
+
+## Classe astratta
+
+#### SCOPO
+
+Può descrivere funzionalità **anche complesse**, comune ad un insieme di oggetti **omogenei**. Può inoltre fornire anche implementazioni di alcuni metodi.
+
+Esempio: la classe astratta Enum fornisce metodi comuni a tutti gli enumerativi.
+
+#### STRUTTURA
+
+I metodi possono avere o meno implementazione. Nel primo caso, può eventualmente essere ridefinita dalle classi che la estendono
+
+Possibilità di avere dello stato interno
+
+C'è possibilità di usare metodi statici
+
+È aperta alle modifiche
+
+#### RELAZIONI con altre classi
+
+Può ereditare da 0+ interfacce e 0+ classi (minimo 1 se esiste una classe radice del sistema, *es. Object*, massimo 1 se non è consentita ereditarietà multipla)
+
+Se vieene aggiunto un metodo, si può fornire un'implementazione di default per non farlo definire a tutte le classi concrete 
+
+# Ciclo di vita di un oggetto esemplificandone i passi utilizzando uno specifico linguaggio OO
+
+
+
+# Tecnologia COM e Framework .NET
+
+## COM
+
+È un sistema orientato agli oggetti per produrre componenti software binari.
+
+Non è un linguaggio, ma uno **standard**, specifica i requisiti di programmazione che permettono agli oggetti COM di interagire con altri oggetti
+
+Tiene traccia della vita di un oggetto tramite **reference counting**. Ogni oggetto mantiene traccia di tutti gli altri oggetti che lo referenziano tramite questo contatore. Appena arriva a 0 l'oggetto stesso diventa responsabile della sua deallocazione
+
+Ha una **limitazione**: la posizione di ogni componente è salvata nel registro Windows, quindi non è possibile avere due versioni dello stesso componente -> problema nelle dipendenze che usano versioni precedenti
+
+## .NET
+
+È un **ambiente di esecuzione** + **libreria di classi** che semplifica lo sviluppo e il deployment. 
+
+È INTEGRATO con COM, ma INDIPENDENTE. Composto dai seguenti elementi:
+
+- `IL`: linguaggio intermedio, il compilatore .NET traduce il codice di alto livello (di solito C#) in questo linguaggio intermedio (.exe o dll) e poi, tramite un compilatore JIT, lo converte in codice macchina
+
+- `CLR` Common Language Runtime, è l'ambiente di esecuzione runtime per le applicazioni .NET, il cui codice eseguito è detto **managed code** (codice gestito)
+
+- `CTS` Common Type System, sono i tipi di dato supportati da .NET (strutture dati, tipi primitivi, enumerativi, delegati), fortemente tipizzati. 
+
+È permessa ereditarietà singola (di estensione) e multipla (di interfaccia)
+
+l’invocazione dei metodi virtuali viene risolta a run-time (**late binding**)
+
+Tutto viene ereditato dalla classe radice **Object**. Possibilità di fare boxing e unboxing 
+
+- `CLS` Common Language Specification, regole che i linguaggi devono seguire per essere interoperabili 
+ 
+ - identificatori (case sensivity, keyword)
+ - costruzione oggetti (denominazione, proprietà...)
 
 # Procedimento di compilazione ed esecuzione del codice all’interno del framework .NET tramite il CLR.
 
@@ -853,13 +953,43 @@ interface Stato {
 
 # Pattern MODEL VIEW CONTROLLER
 
+Il pattern MVC è di tipo architetturale, e serve per introdurre una chiara separazione di ruoli tra componenti di basso livello (logica di business) e alto livello (presentazione), introducendo anche un elemento intermedio:
+
+### Model
+
+Modello dai dati, con operazioni di accesso e modifica. Generalmente sono degli oggetti **Observable** che notificano alla view il loro cambiamento di stato
+
+## #View
+
+Logica di presentazione su un dispositivo di output. Sono degli oggetti **Observer** che si iscrivono ai dati del model volendo rilevarne i cambiamenti di stato. 
+
+### Controller
+
+Si occupa di prendere gli input dall'utente mappandole opportunamente in **comandi** che andranno a modificare view o model.
+
 # Pattern MODEL VIEW PRESENTER
+
+Simile al MVC, ma introduce ancora più separazione tra i ruoli dei singoli componenti. Si usano **più presenter** ognuno associato ad una particolare view.
+
+### Model
+
+Modello dai dati logicamente correlati. Generano un **evento** quando lo stato cambia. Gestiscono la **registrazione in forma anonima** degli oggetti interessati alla notifica dell'evento.
+
+## #View
+
+Si **registra presso il presenter** e mappa i dati forniti dal presenter. 
+
+### Presenter
+
+Gestisce input dall'utente e mappa le azioni in comandi. Aggiorna la view.
 
 # Pattern ABSTRACT FACTORY
 
-# Qualità di un buon software
 
-# 
+
+# Fattori di qualità di un buon software
+
+
 
 # Modello LMU nei VCS con vantaggi e svantaggi
 
