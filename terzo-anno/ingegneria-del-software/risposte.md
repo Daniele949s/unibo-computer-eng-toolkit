@@ -989,7 +989,23 @@ Gestisce input dall'utente e mappa le azioni in comandi. Aggiorna la view.
 
 # Fattori di qualità di un buon software
 
+- **correttezza**: adempie ai suoi compiti correttamente
 
+- **robustezza**: si comporta bene anche in situazioni anomale o impreviste, non crasha
+
+- **affidabilità**: i sistemi / persone che dipendono dall'architettura riescono a farci pienamente affidamento
+
+- **estendibilità**: il design permette di aggiungere facilmente modifiche non previste
+
+- **riusabilità**: utilizzabile da altri programmi facilmente, ben integrabile
+
+- **facilità d'uso**: si spiega da solo
+
+- **efficienza**: buon uso delle tecnologie
+
+- **verificabilià**: si sottopone bene ai test
+
+- **portabilità**: si adatta alle varie piattaforme
 
 # Modello LMU nei VCS con vantaggi e svantaggi
 
