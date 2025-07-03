@@ -233,7 +233,7 @@ new Oggetto ->
     - Positivo: GC
     - Negativo: OutOfMemoryException
 3. `ThisObjPtr` = `NextObjPtr`; `NextObjPtr` = `sizeof(obj)` 
-4. Invoca il costruttore della classe specificata.
+4. Invoca il costruttore della classe specificata. `(this = thisObjPtr)`;
 5. Restituisce al chiamante della new il riferimento all'area di memoria.
 
 Dopo questi passaggi l'oggetto viene utilizzato dal chiamante, e rimane in memoria finchè necessario. 
@@ -366,27 +366,18 @@ Gli oggetti passati come argomento ai metodi vanno inizializzati prima
     
     - Riferimento: il metodo agisce su una copia del riferimento, non su quello originale
 
-```java
+### Out (out)
+Vanno inizializzati all'interno del metodo al quale sono passati come argomenti.
 
-```
+Viene passato per **riferimento** e le modifiche del valore dell’argomento (l’inizializzazione è obbligatoria) hanno **effetto sul chiamante**
 
-### Out
-Vanno inizializzati all'interno del metodo al quale sono passati come argomenti
-
-```java
-
-```
-
-### In / Out
+### In / Out (ref)
 Gli oggetti passati come argomento ai metodi vanno inizializzati prima
 
     - Valore: il metodo agisce sul riferimento -> le modifiche hanno effetto su quello originale
     
     - Riferimento: le modifiche influenzano l'oggetto referenziato
     
-```java
-
-```
 
 # Garbage collector in C#
 
@@ -455,6 +446,8 @@ Si nota come non la definizione di raggiungibilità dell'oggetto non è ottimale
 
 6. Viene invocato il costruttore dell'oggetto
 
+- ` this = thisObjPtr`
+
 7. Viene restituito il riferimento all'oggetto
 
 # Concetto di delegato in C#
@@ -490,7 +483,12 @@ Per comunicare al BOSS, il WORKER sfrutta un delegato che ha i riferimenti a tut
 
 Un evento è un meccanismo che permette a una classe notificare altre entità "interessate" quando qualcosa di significativo accade in seguito ad interazione con l'utente o cambiamenti di stato "interni" al programma.
 
-Sono più potenti dei delegati in quanto hanno un sistema integrato di *registrazione* e *implementazione privata* 
+I **DELEGATI** usavano campi pubblici per la registrazione, ma questa soluzione offre troppo accesso: 
+
+- un cliente può sovrascrivere dei target precedentemente registrati
+- li può invocare
+
+Sono più potenti dei delegati in quanto hanno un sistema integrato di *registrazione* (pubblica) e campi delegati con *implementazione privata* 
 
 Esso non fa altro che **incapsulare un delegato**, ma è più sicuro. Infatti il delegato, se pubblico, è accessibile direttamente da tutti.
 
@@ -507,7 +505,7 @@ Il delegato va definito precedentemente, con i suoi due parametri:
 - fonte che ha generato l'evento
 - dati dedicati all'evento, se servono dati extra si usa un tipo che estende `EventArgs`
 
-Se però non gestisce dei dati, è sufficiente usare la classe "default" `System.EventHandler`. 
+Se però non gestisce dei dati, basta utilizzare il delegato presente nella classe "default" `System.EventHandler`. 
 
 ## Funzionalità
 
@@ -521,6 +519,10 @@ Essendo un delegato a tutti gli effetti, è possibile effettuare le operazioni d
 
 - `+=`: aggiunta di un delegato (handler) all'evento
 - `-=`: sganciarsi dall'evento
+
+Quindi un cliente può **aggiungere e rimuovere handler** per un evento 
+
+ma non può ottenere o modificare in nessun altro modo l’elenco sottostante dei gestori di eventi
 
 Per ricevere notifiche dall'evento, il cliente deve definire un metodo `EventHandler`
 
@@ -754,7 +756,12 @@ formalmente, le formulazioni sono due, una forte e una più debole:
 
 - **Forte**: chiunque utilizzi istanze della classe padre non deve percepire variazioni logiche rispetto all'uso delle istanze delle sue classi figlie
 
-Più specificatamente, è opportuno definire i concetti di:
+### Design by contract
+
+La principale causa di violazioni al principio di Liskov è data dalla ridefinizione di metodi virtuali nelle classi virtuali;
+
+la chiave per evitare queste violazioni risiede nel design by contract. Nel design by contract ogni metodo ha:
+
 
 - **Precondizioni**: sono i requisiti che un chiamante deve rispettare affinchè il metodo invocato possa essere eseguito correttamente.
 
