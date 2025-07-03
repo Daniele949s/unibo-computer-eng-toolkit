@@ -2,6 +2,7 @@
 # Indice
 
 ## Modulo 1.1
+- [ADT ed incapsulamento](#adt-ed-incapsulamento)
 - [Come viene implementata l’ereditarietà multipla?](#come-viene-implementata-lereditarietà-multipla)
 - [Si esegua una classificazione del polimorfismo secondo Cardelli-Wegner e si mostri l’implementazione del polimorfismo per inclusione.](#si-esegua-una-classificazione-del-polimorfismo-secondo-cardelli-wegner-e-si-mostri-limplementazione-del-polimorfismo-per-inclusione)
 - [Differenze tra interfaccia e classe astratta](#differenze-tra-interfaccia-e-classe-astratta)
@@ -56,6 +57,21 @@
 - [Capacità di sopravvivenza del sistema](#capacità-di-sopravvivenza-del-sistema)
 
 ---
+
+# ADT ed incapsulamento
+
+È un modello matematico per strutture dati che permette di definire:
+
+**COSA** fa un certo tipo di dato senza specificare il **COME**, quindi quali **operazioni** e che **comportamento** avranno (utile per astrazione, modularità e riusabilità)
+
+Per definirlo, serve:
+
+- **interfaccia** pubblica, che specifica metodi pubblici applicabili a oggetti di quel tipo
+- **implementazione** privata, con campi privati e metodi pubblici e privati
+
+### Incapsulamento
+
+O information hiding, significa nascondere agli utilizzatori finali i dettagli sulla struttura e il funzionamento interno, nascondendo scelte progettuali.
 
 # Come viene implementata l’ereditarietà multipla?
 
@@ -201,7 +217,55 @@ Se vieene aggiunto un metodo, si può fornire un'implementazione di default per 
 
 # Ciclo di vita di un oggetto esemplificandone i passi utilizzando uno specifico linguaggio OO
 
+Consideriamo il linguaggio Java su JVM.
 
+## INIZIO PROGRAMMA
+la JVM alloca un area di memoria continua, detta **managed heap**, dove poi conservare gli oggetti allocati a runtime (la quale può crescere a runtime)
+
+`NextObjPtr` = puntatore al primo indirizzo libero del managed heap
+
+## NASCITA OGGETTO
+
+new Oggetto ->
+    
+1. Calcola la dimensione in memoria che l'oggetto occuperebbe, analizzando tutti i campi . 
+2. Controlla che nel managed heap ci sia abbastanza spazio. Esiti:
+    - Positivo: GC
+    - Negativo: OutOfMemoryException
+3. `ThisObjPtr` = `NextObjPtr`; `NextObjPtr` = `sizeof(obj)` 
+4. Invoca il costruttore della classe specificata.
+5. Restituisce al chiamante della new il riferimento all'area di memoria.
+
+Dopo questi passaggi l'oggetto viene utilizzato dal chiamante, e rimane in memoria finchè necessario. 
+
+## MORTE OGGETTO 
+
+Quando l'oggetto non è più "necessario" (in base alla **strategia di liberazione della memoria** del GC) la JVM procede a:
+
+1.  Chiamare il metodo `finalize()` dell'oggetto (NON PIU CHIAMABILE DIRETTAMENTE).
+
+2. Marcare lo spazio di memoria una volta preso dall'oggetto come di nuovo disponibile, così da permetterne l'utilizzo da parte di altri oggetti.
+
+Le strategie per marcare un oggetto come "non necessario" sono molte. Ne analizziamo due:
+
+### Reference counting
+
+Utilizzato per esempio dal sistema COM, in cui a fianco dell'oggetto viene conservato il numero di puntatori attualmente attivi verso l'oggetto. 
+
+### Tracing
+Due fasi:
+
+1. **marcatura**: oggetti raggiungibili sono:
+
+    - oggetti con riferimenti sullo stack attuale
+    - oggetti con riferimenti globali
+    - riferimenti su registri CPU 
+    
+Si procede quindi alla marcatura ricorsiva di tutti i riferimenti che fanno parte degli oggetti radice e di quelli già marcati, saltando quelli già marcati precedentemente
+
+2. **liberazione**
+
+Gli oggetti presenti nel managed heap che non sono stati marcati durante la prima fase vengono finalizzati e ne viene liberata la memoria
 
 # Tecnologia COM e Framework .NET
 
@@ -978,7 +1042,7 @@ Il pattern MVC è di tipo architetturale, e serve per introdurre una chiara sepa
 
 Modello dai dati, con operazioni di accesso e modifica. Generalmente sono degli oggetti **Observable** che notificano alla view il loro cambiamento di stato
 
-## #View
+### View
 
 Logica di presentazione su un dispositivo di output. Sono degli oggetti **Observer** che si iscrivono ai dati del model volendo rilevarne i cambiamenti di stato. 
 
@@ -994,7 +1058,7 @@ Simile al MVC, ma introduce ancora più separazione tra i ruoli dei singoli comp
 
 Modello dai dati logicamente correlati. Generano un **evento** quando lo stato cambia. Gestiscono la **registrazione in forma anonima** degli oggetti interessati alla notifica dell'evento.
 
-## #View
+### View
 
 Si **registra presso il presenter** e mappa i dati forniti dal presenter. 
 
