@@ -330,17 +330,28 @@ mediante blocchi *throw* (propagare un'eccezione),*catch* (catturare un'eccezion
 # Differenza tra tipi valore e tipi riferimento in .NET
 
 In CTS ogni classe eredita da System.Object, possiamo quindi fornire un modello di programmazione unificato. I tipi possono essere:
+
 ## Tipi
 ### Tipi valore
 
-Sono dati (byte) opportunamente allocati sullo *stack*, o appartengono a *oggetti*, e possono essere:
+Contengono direttamente i dati (byte), sono allocati sullo *stack*, o appartengono a *oggetti*, e possono essere:
     
     - **Primitivi**: boolean, float, double, Int32, char ...
     - **Custom**: definiti dall'utente
 
+Quando li assegni a una nuova variabile o li passi a una funzione, viene creata una copia del valore.
+
+Sono immutabili per natura, nel senso che ogni variabile è indipendente.
+
 ### Tipi riferimento
 
-Sono indirizzi che rappresentano i riferimenti a uno specifico dato all'interno del "managed heap"
+Sono indirizzi che rappresentano i riferimenti a uno specifico dato all'interno del "managed heap".
+
+Anche se i reference type sono allocati sull’heap, la variabile che contiene il riferimento è sullo stack.
+
+Quando li assegni o li passi a una funzione, viene copiato solo il riferimento, non l’oggetto vero.
+
+Modifiche a un oggetto sono visibili ovunque ci sia il riferimento.
 
 ## Conversioni
 ### Boxing
