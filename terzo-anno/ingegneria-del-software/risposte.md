@@ -1030,15 +1030,47 @@ f1.accept(calcolaArea);    // calcola area cerchio
 Le classi concrete contengono la logica di transizione da uno stato all’altro e il pattern permette anche di emulare
 l’ereditarietà multipla
 
-`Context`: mantiene un riferimento allo stato corrente e lo delega
+- `Context`: mantiene un riferimento allo stato corrente e lo delega
 
-`State`e`ConcreteState`: metodi comuni a tutti gli stati e le loro implementazioni
+- `State`e`ConcreteState`: metodi comuni a tutti gli stati e le loro implementazioni
 
 ```java
-interface Stato {
-    void muovi(Giocatore g)
+interface State {
+    void pressSwitch(Light context); // deve essere accesa o spenta
 }
 
+// Stato: Spento
+class OffState implements State {
+    public void pressSwitch(Light context) {
+        System.out.println("Luce accesa!");
+        context.setState(new OnState()); // logica di transizione da uno stato all'altro
+    }
+}
+
+// Stato: Spento
+class OnState implements State {
+    public void pressSwitch(Light context) {
+        System.out.println("Luce accesa!");
+        context.setState(new OnState()); // logica i transizione da uno stato all'altro
+    }
+}
+
+// Contesto: Lampadina
+class Light {
+    private State state;
+
+    public Light() {
+        state = new OffState(); // inizialmente spenta
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    public void pressSwitch() {
+        state.pressSwitch(this);
+    }
+}
 ```
 
 # Pattern MODEL VIEW CONTROLLER
