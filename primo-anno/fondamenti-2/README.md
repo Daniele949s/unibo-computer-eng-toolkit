@@ -5,7 +5,7 @@
 La struttura delle libreria è la seguente:
 
 ```
-   - libs
+   - lib
 	file .txt con suggerimenti pratici su ogni
 	aspetto dell'esame
 
