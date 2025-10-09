@@ -16,3 +16,7 @@ La struttura dei corsi, i docenti o le modalità d’esame potrebbero essere cam
 
 **Disclaimer**: Questo materiale è stato raccolto solo a scopo informativo / di supporto e non viene mantenuto attivamente.
 In particolare, in caso di aggiornamenti agli IDE o agli strumenti utilizzati, verifica sempre ciò che esegui.
+
+# Buy me a coffee! ☕️
+
+Se hai trovato utili le mie librerie e ti va di supportarmi: https://www.paypal.me/DavideChirichella
