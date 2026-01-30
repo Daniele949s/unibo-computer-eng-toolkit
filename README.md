@@ -2,7 +2,8 @@
 
 Sono Davide Chirichella, studente di [Ingegneria Informatica](corsi.unibo.it/laurea/IngegneriaInformatica) all'Università di Bologna (unibo), immatricolato nel 2022.
 
-Qui sono raccolte le librerie che ho utilizzato per tutti gli esami di programmazione del mio percorso, molte anche in collaborazione con [Filippo Giulietti](https://github.com/FiloGiulietts)
+Qui sono raccolte le librerie che ho utilizzato per tutti gli esami di programmazione del mio percorso, molte anche in collaborazione con [Filippo Giulietti](https://github.com/FiloGiulietts).
+Sentiti libero di contribuire!
 
 #  Struttura
 
