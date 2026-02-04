@@ -1,5 +1,3 @@
-//CHIRICHELLA DAVIDE 0001071414
-
 import java.io.*;
 
 public class RMI_Object implements Serializable {

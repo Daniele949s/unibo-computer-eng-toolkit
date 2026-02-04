@@ -1,5 +1,3 @@
-//CHIRICHELLA DAVIDE 0001071414
-
 public class Elemento {
     private String DATO1 = null;
     private String DATO2 = null;

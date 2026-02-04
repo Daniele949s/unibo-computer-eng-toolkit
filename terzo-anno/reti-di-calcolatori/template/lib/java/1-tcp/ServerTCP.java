@@ -1,5 +1,3 @@
-//CHIRICHELLA DAVIDE 0001071414
-
 import java.io.*;
 import java.net.*;
 

@@ -1,5 +1,3 @@
-//CHIRICHELLA DAVIDE 0001071414
-
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>

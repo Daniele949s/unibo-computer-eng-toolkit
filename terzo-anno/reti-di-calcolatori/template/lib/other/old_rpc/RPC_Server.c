@@ -1,8 +1,3 @@
-/*
-/// Author: Davide Chirichella
-/// Matricola: 0001071414
-*/
-
 #include "RPC_xFile.h"
 #include <dirent.h>
 #include <fcntl.h>

@@ -1,5 +1,3 @@
-/* CHIRICHELLA DAVIDE 0001071414 */
-
 const MAX_NAME_SIZE = 30;
 const MAX_LIST_SIZE = 6; /* Massimo di elementi che possono essere restituiti */
 

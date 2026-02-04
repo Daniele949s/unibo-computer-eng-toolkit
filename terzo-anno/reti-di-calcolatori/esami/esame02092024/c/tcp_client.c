@@ -1,4 +1,3 @@
-//CHIRICHELLA DAVIDE 0001071414
 
 #include <fcntl.h>
 #include <netdb.h>
